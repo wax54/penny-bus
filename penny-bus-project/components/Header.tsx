@@ -1,10 +1,11 @@
+import { Nav as NavType } from "../constants/nav";
 import { Nav } from "./Nav";
 
 export const Header = ({
   nav,
   styles,
 }: {
-  nav: readonly { href: string; text: string }[];
+  nav: NavType
   styles: {
     header: any;
     title: any;

@@ -1,5 +1,4 @@
-import { styles } from "./styles";
-
+export type Nav = readonly { href: string; text: string }[];
 export const nav = [
   {
     text: "Home",
@@ -10,7 +9,6 @@ export const nav = [
         <p>YAdaYada</p>
         <h3>Who Are We</h3>
         <p>YAdaYada</p>
-
 
       </div>
     ),
