@@ -10,18 +10,25 @@ import { nav } from "../../constants/nav";
 import db from "../../db";
 import { BlogDate, Blog as BlogType } from "../../types";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import { styles } from "../../constants/styles";
+import { CSSProperties } from "react";
+import { brandColors } from "../../constants/colors";
 
-function BlogPost({ blog }: { blog: BlogType }) {
+function BlogPost({
+  blog,
+  style,
+}: {
+  blog: BlogType;
+  style: { main: CSSProperties, author: CSSProperties };
+}) {
   function DateStamp({ date }: { date: BlogDate }) {
     function getStayLength(lengthMS: number) {
       let hours = Math.round(lengthMS / 1000 / 60 / 60);
       let days = 0;
-      console.log({ hours, days });
       while (hours > 24) {
         hours -= 24;
         days += 1;
       }
-      console.log({ hours, days });
 
       return `~ ${days > 0 ? `${days} Days, ` : ""}${
         hours > 0 ? `${hours} Hours` : ""
@@ -55,13 +62,14 @@ function BlogPost({ blog }: { blog: BlogType }) {
     );
   }
   return (
-    <div style={{ padding: 20, color: "white" }}>
+    <div style={style.main}>
       <h1>{blog.title}</h1>
       <h2>{blog.subtitle}</h2>
       <DateStamp date={blog.date} />
       {blog.body.map((text) => (
         <ReactMarkdown>{text}</ReactMarkdown>
       ))}
+      <p style={style.author}><em>Author: {blog.author}</em></p>
     </div>
   );
 }
@@ -70,8 +78,48 @@ export default function Blog({
   blog,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <Layout nav={nav}>
-      <BlogPost blog={blog} />
+    <Layout
+      nav={nav}
+      style={{
+        ...styles,
+        page: {
+          ...styles.page,
+          view: {
+            ...styles.page.view,
+            backgroundColor: brandColors.white,
+          },
+          header: {
+            ...styles.page.header,
+            backgroundColor: brandColors.accent,
+            borderBottomLeftRadius: 100,
+            borderBottomRightRadius: 0,
+            padding: 20,
+          },
+          sideBar: {
+            backgroundColor: brandColors.accent,
+            float: "right",
+            width: 100,
+            height: 400,
+          },
+        },
+      }}
+    >
+      <BlogPost
+        blog={blog}
+        style={{
+          main: {
+            borderTopLeftRadius: 100,
+            padding: 20,
+            marginTop: 50,
+            paddingLeft: 80,
+            color: brandColors.white,
+            backgroundColor: brandColors.accent,
+          },
+          author: {
+            padding: 10,
+          }
+        }}
+      />
     </Layout>
   );
 }

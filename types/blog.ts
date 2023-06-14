@@ -3,6 +3,7 @@ export type Blog = {
   subtitle?: string;
   date: BlogDate;
   body: string[];
+  author: string;
 };
 
 export type BlogDate = {

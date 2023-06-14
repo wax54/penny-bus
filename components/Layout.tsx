@@ -1,11 +1,13 @@
 import { Nav } from "../constants/nav"
-import { styles } from "../constants/styles"
+import { StylesType, styles } from "../constants/styles"
 import { Header } from "./Header"
 
-export const Layout = (props: { children: JSX.Element | JSX.Element[] | undefined, nav: Nav }) => {
-  return <div id="page" style={styles.page.main}>
-  <div id="view" style={styles.page.view}>
-      <Header nav={props.nav} styles={styles.page} />
+export const Layout = (props: { children: JSX.Element | JSX.Element[] | undefined, nav: Nav, style?: StylesType }) => {
+  const page = props.style?.page ?? styles.page;
+  return <div id="page" style={page.main}>
+  <div id="view" style={page.view}>
+      <Header nav={props.nav} styles={page} />
+      <div id='side-bar' style={page.sideBar}/>
       {props.children}
     </div>
   </div>

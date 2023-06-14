@@ -1,17 +1,13 @@
 import { Nav as NavType } from "../constants/nav";
+import { StylesType } from "../constants/styles";
 import { Nav } from "./Nav";
 
 export const Header = ({
   nav,
   styles,
 }: {
-  nav: NavType
-  styles: {
-    header: any;
-    title: any;
-    subtitle: any;
-    nav: { main: any; a: any };
-  };
+  nav: NavType;
+  styles: StylesType['page']
 }) => {
   return (
     <div style={styles.header}>
