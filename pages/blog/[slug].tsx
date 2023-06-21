@@ -142,12 +142,14 @@ export function getStaticProps({
   const slug = params.slug;
   const blog = db.blog[slug];
 
-  if (!blog)
+  if (!blog) {
+    const redirect = new URLSearchParams({reason:`${slug}+blog+not+found`, redirect:`/blog/${slug}`});
     return {
       redirect: {
-        destination: `/404?reason=${slug}++blog+not+found+`,
+        destination: '/404?' + redirect,
         permanent: false,
       },
     };
+  }
   return { props: { blog } };
 }
