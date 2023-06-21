@@ -7,7 +7,7 @@ export default function Home({}: InferGetStaticPropsType<GetStaticProps>) {
   return (
     <Layout nav={nav}>
       <div id="content">
-        <div id="content" style={{ color: "white", textAlign: "center" }}>
+        <div id="content" className="text-center text-white">
           <h3>Our Mission Statement</h3>
           <p>YAdaYada</p>
           <h3>Who Are We</h3>

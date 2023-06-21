@@ -2,39 +2,39 @@ export type Nav = readonly { href: string; text: string }[];
 export const nav = [
   {
     text: "Home",
-    href: "/",
+    href: "/home",
   },
   {
     text: "Bus Tour",
-    href: "tour",
+    href: "/tour",
   },
   {
     text: "Blog",
-    href: "blog",
+    href: "/blog",
   },
 
   {
     text: "Videos",
-    href: "videos",
+    href: "/videos",
   },
 
   {
     text: "FAQ",
-    href: "faq",
+    href: "/faq",
   },
 
   {
     text: "Reviews",
-    href: "reviews",
+    href: "/reviews",
   },
 
   {
     text: "Tips + Tricks",
-    href: "tips",
+    href: "/tips",
   },
 
   {
     text: "Photos",
-    href: "photos",
+    href: "/photos",
   },
 ] as const;

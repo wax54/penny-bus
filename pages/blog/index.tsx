@@ -34,7 +34,7 @@ export default function Blog({
       </div>
       <ol style={{ margin: 20 }}>
         {blogs.map(({ key, blog }) => (
-          <li style={{ margin: "auto" }}>
+          <li key={key} style={{ margin: "auto" }}>
             <a
               href={`/blog/${key}`}
               onMouseEnter={handleMouseEnter}
