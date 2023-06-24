@@ -9,7 +9,18 @@ module.exports = {
     // "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+
+      colors: {
+        'text': '#000000',
+        'textSecondary': '#FFFFFF',
+        'textAccent': '#FFFF00',
+        'primary': '#EEFFEE',
+        'secondary': '#EE9999',
+        'accent': '#99EE99',
+        'secondaryAccent': '#EEFFEE',
+      },
+    },
   },
   plugins: [],
 }

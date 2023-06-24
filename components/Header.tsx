@@ -10,8 +10,8 @@ export const Header = ({
   styles: StylesType['page']
 }) => {
   return (
-    <div style={styles.header}>
-      <h1 id="page-title" style={styles.title}>
+    <div style={styles.header} className="p-10">
+      <h1 id="page-title" style={styles.title} className="m-5">
         <em>The Penny Bus Project</em>
       </h1>
       <Nav nav={nav} styles={styles.nav} />

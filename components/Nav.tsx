@@ -23,9 +23,8 @@ export const Nav = (props: {
         <a
           key={item.href}
           href={item.href}
-          // style={styles.a}
-          className={`${
-            item.isActive ? "bg-[white] text-[black]" : ""
+          className={` text-textSecondary m-1 py-2 px-5 rounded-[10px] hover:bg-secondary ${
+            item.isActive ? "!bg-primary !text-text" : ""
           }`}
         >
           {item.text}
