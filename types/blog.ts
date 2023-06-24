@@ -2,9 +2,10 @@ export type Blog = {
   title: string;
   subtitle?: string;
   date: BlogDate;
-  body: string[];
+  body?: string[];
   author: string;
-};
+  bodyLink?: string;
+} & ({body: string[]} | {bodyLink: string});
 
 export type BlogDate = {
   firstNight: string;

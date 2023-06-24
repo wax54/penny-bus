@@ -13,13 +13,14 @@ import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
 import { CSSProperties } from "react";
 import { brandColors } from "../../constants/colors";
+import { logger } from "../../logger";
 
 function BlogPost({
   blog,
   style,
 }: {
   blog: BlogType;
-  style: { main: CSSProperties, author: CSSProperties };
+  style: { main: CSSProperties; author: CSSProperties };
 }) {
   function DateStamp({ date }: { date: BlogDate }) {
     function getStayLength(lengthMS: number) {
@@ -29,10 +30,13 @@ function BlogPost({
         hours -= 24;
         days += 1;
       }
-
-      return `~ ${days > 0 ? `${days} Days, ` : ""}${
-        hours > 0 ? `${hours} Hours` : ""
-      }`;
+      if (days > 0 && hours > 12) {
+        hours = 0;
+        days += 1;
+      }
+      return `~ ${days > 0 ? `${days} Days` : ""}${
+        days > 0 && hours > 0 ? ", " : ""
+      }${hours > 0 ? `${hours} Hours` : ""}`;
     }
     return (
       <div>
@@ -65,11 +69,15 @@ function BlogPost({
     <div style={style.main}>
       <h1>{blog.title}</h1>
       <h2>{blog.subtitle}</h2>
-      <DateStamp date={blog.date} />
-      {blog.body.map((text) => (
+      <div className="pb-10">
+        <DateStamp date={blog.date} />
+      </div>
+      {blog.body?.map((text) => (
         <ReactMarkdown>{text}</ReactMarkdown>
       ))}
-      <p style={style.author}><em>Author: {blog.author}</em></p>
+      <p style={style.author}>
+        <em>Author: {blog.author}</em>
+      </p>
     </div>
   );
 }
@@ -117,7 +125,7 @@ export default function Blog({
           },
           author: {
             padding: 10,
-          }
+          },
         }}
       />
     </Layout>
@@ -129,24 +137,38 @@ export function getStaticPaths({}: GetStaticPathsContext): GetStaticPathsResult 
     fallback: "blocking",
   };
 }
-export function getStaticProps({
+export async function getStaticProps({
   params,
-}: GetStaticPropsContext<{ slug: string }>): GetStaticPropsResult<{
-  blog: BlogType;
-}> {
+}: GetStaticPropsContext<{ slug: string }>): Promise<
+  GetStaticPropsResult<{
+    blog: BlogType;
+  }>
+> {
   if (!params)
     return {
       redirect: { destination: "/", permanent: false },
     };
-  console.log({ params });
   const slug = params.slug;
   const blog = db.blog[slug];
+  if (blog.bodyLink) {
+    const blogBodyUrl = new URL(blog.bodyLink, process.env.NEXT_SITE_URL);
+    try {
+      const res = await fetch(blogBodyUrl);
+      const body = await res.text();
+      blog.body = body.split("\n");
+    } catch (e) {
+      logger(e, "ERROR");
+    }
+  }
 
   if (!blog) {
-    const redirect = new URLSearchParams({reason:`${slug}+blog+not+found`, redirect:`/blog/${slug}`});
+    const redirect = new URLSearchParams({
+      reason: `${slug}+blog+not+found`,
+      redirect: `/blog/${slug}`,
+    });
     return {
       redirect: {
-        destination: '/404?' + redirect,
+        destination: "/404?" + redirect,
         permanent: false,
       },
     };

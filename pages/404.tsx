@@ -20,7 +20,7 @@ export default function NotFound() {
         </button>
       ) : null}
 
-      <button onClick={() => router.isReady && router.replace("/home")}>
+      <button onClick={() => router.isReady && router.push("/home")}>
         Go Home
       </button>
     </div>

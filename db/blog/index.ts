@@ -26,4 +26,18 @@ export default {
       `Thanks for listening`,
     ],
   },
+
+  "tish-tang-campground": {
+    title: "Tish Tang - Campground",
+    fee: 20,
+    siteName: '25',
+    date: {
+      firstNight: "2023-06-18",
+      lastNight: "2023-06-23",
+      arrival: "2023-06-18T15:58:00.000-07:00",
+      departure: "2023-06-24T09:30:00.000-07:00",
+    },
+    author: "Sam Crewe-Sullam",
+    bodyLink: "/db/tish-tang-campground.md",
+  },
 };
