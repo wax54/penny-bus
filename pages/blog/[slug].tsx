@@ -8,18 +8,19 @@ import {
 import { Layout } from "../../components/Layout";
 import { nav } from "../../constants/nav";
 import db from "../../db";
-import { BlogDate, Blog as BlogType } from "../../types";
+import { BlogDate, BlogData } from "../../types";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
 import { CSSProperties } from "react";
 import { brandColors } from "../../constants/colors";
 import { logger } from "../../logger";
+import { BlogApi } from "../../api";
 
 function BlogPost({
   blog,
   style,
 }: {
-  blog: BlogType;
+  blog: BlogData;
   style: { main: CSSProperties; author: CSSProperties };
 }) {
   function DateStamp({ date }: { date: BlogDate }) {
@@ -141,7 +142,7 @@ export async function getStaticProps({
   params,
 }: GetStaticPropsContext<{ slug: string }>): Promise<
   GetStaticPropsResult<{
-    blog: BlogType;
+    blog: BlogData;
   }>
 > {
   if (!params)
@@ -149,21 +150,10 @@ export async function getStaticProps({
       redirect: { destination: "/", permanent: false },
     };
   const slug = params.slug;
-  const blog = db.blog[slug];
-  if (blog.bodyLink) {
-    const blogBodyUrl = new URL(blog.bodyLink, process.env.NEXT_SITE_URL);
-    try {
-      const res = await fetch(blogBodyUrl);
-      const body = await res.text();
-      blog.body = body.split("\n");
-    } catch (e) {
-      logger(e, "ERROR");
-    }
-  }
-
-  if (!blog) {
+  const { status, blog, error } = await BlogApi.get(slug);
+  if (status !== "success") {
     const redirect = new URLSearchParams({
-      reason: `${slug}+blog+not+found`,
+      reason: error ?? `${slug}+blog+not+found`,
       redirect: `/blog/${slug}`,
     });
     return {

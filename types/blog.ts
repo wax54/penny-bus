@@ -1,4 +1,4 @@
-export type Blog = {
+export type BlogData = {
   title: string;
   subtitle?: string;
   date: BlogDate;

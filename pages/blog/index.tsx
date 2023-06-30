@@ -1,12 +1,12 @@
 import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { Layout } from "../../components/Layout";
 import { nav } from "../../constants/nav";
-import db from "../../db";
 import { useState } from "react";
-import { Blog } from "../../types";
-const sortByDate = (a: Blog, b: Blog) =>
+import { BlogData } from "../../types";
+import { BlogApi } from "../../api";
+const sortByDate = (a: BlogData, b: BlogData) =>
   new Date(a.date.arrival).getTime() - new Date(b.date.arrival).getTime();
-const sortByTitle = (a: Blog, b: Blog) =>
+const sortByTitle = (a: BlogData, b: BlogData) =>
   a.title > b.title ? 1 : a.title === b.title ? 0 : -1
 
 const sortOptions = [
@@ -43,7 +43,7 @@ export default function Blog({
           fontSize: "2rem",
         }}
       >
-        Our Blog!
+        Our BlogApi!
       </h2>
       <div style={{ position: "relative", padding: 20 }}>
         <button
@@ -89,13 +89,10 @@ export default function Blog({
   );
 }
 
-export function getStaticProps({}: GetStaticPropsContext) {
+export async function getStaticProps({}: GetStaticPropsContext) {
   return {
     props: {
-      blogs: Object.keys(db.blog).map((key) => ({
-        key: key,
-        blog: db.blog[key],
-      })),
+      blogs: await BlogApi.getAll()
     },
   };
 }

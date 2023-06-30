@@ -1,4 +1,11 @@
 export default {
+  "fathers-home": {},
+  "brother-home": {},
+  "hughs-flower-farm-hipcamp": {},
+  "honey-lake-rv-park": {},
+  "the-boys-home": {},
+  "joshua-tree-dispersed": {},
+  "hot-springs-hotel": {},
   "anderson-walmart": {
     title: "Anderson - Walmart",
     date: {
@@ -26,7 +33,11 @@ export default {
       `Thanks for listening`,
     ],
   },
+  "aikens-west-creek-campground": {
+  },
+  "beach-house-airbnb": {
 
+  },
   "tish-tang-campground": {
     title: "Tish Tang - Campground",
     fee: 20,
@@ -39,5 +50,11 @@ export default {
     },
     author: "Sam Crewe-Sullam",
     bodyLink: "/db/tish-tang-campground.md",
+  },
+
+  "lagoon-campground": {
+    title: "Lagoon!",
+    fee: 22,
+    siteName: '36',
   },
 };
