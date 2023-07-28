@@ -1,16 +1,19 @@
-export type Nav = readonly { href: string; text: string }[];
+export type NavItem = { href: string; text: string, isActive?: boolean };
 export const nav = [
   {
     text: "Home",
     href: "/home",
+    isActive: true
   },
   {
     text: "Bus Tour",
     href: "/tour",
+    isActive: false
   },
   {
     text: "Blog",
     href: "/blog",
+    isActive: true
   },
 
   {
@@ -37,4 +40,4 @@ export const nav = [
     text: "Photos",
     href: "/photos",
   },
-] as const;
+] as NavItem[];

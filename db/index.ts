@@ -1,7 +1,7 @@
-import { Blog } from '../types'
+import { BlogData } from '../types'
 import blog from './blog'
 export default {
   blog 
 } as {
-  blog: {[slug: string]: Blog}
+  blog: {[slug: string]: BlogData}
 }

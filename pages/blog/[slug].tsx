@@ -7,13 +7,11 @@ import {
 } from "next";
 import { Layout } from "../../components/Layout";
 import { nav } from "../../constants/nav";
-import db from "../../db";
 import { BlogDate, BlogData } from "../../types";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
 import { CSSProperties } from "react";
 import { brandColors } from "../../constants/colors";
-import { logger } from "../../logger";
 import { BlogApi } from "../../api";
 
 function BlogPost({
@@ -73,8 +71,8 @@ function BlogPost({
       <div className="pb-10">
         <DateStamp date={blog.date} />
       </div>
-      {blog.body?.map((text) => (
-        <ReactMarkdown>{text}</ReactMarkdown>
+      {blog.body?.map((text, i) => (
+        <ReactMarkdown key={i}>{text}</ReactMarkdown>
       ))}
       <p style={style.author}>
         <em>Author: {blog.author}</em>
@@ -85,7 +83,10 @@ function BlogPost({
 
 export default function Blog({
   blog,
-}: InferGetStaticPropsType<typeof getStaticProps>) {
+}: InferGetStaticPropsType<typeof getServerSideProps>) {
+  if (!blog) {
+    return <div>LOADING!</div>
+  }
   return (
     <Layout
       nav={nav}
@@ -132,25 +133,31 @@ export default function Blog({
     </Layout>
   );
 }
-export function getStaticPaths({}: GetStaticPathsContext): GetStaticPathsResult {
-  return {
-    paths: [],
-    fallback: "blocking",
-  };
-}
-export async function getStaticProps({
+// export async function getStaticPaths({}: GetStaticPathsContext): Promise<GetStaticPathsResult> {
+//   const blogs = await BlogApi.getAll();
+//   const keys = blogs.map((blog) => ({ params: { slug: blog.key } }));
+//   console.log(keys);
+//   return {
+//     paths: keys,
+//     fallback: 'blocking',
+//   };
+// }
+export async function getServerSideProps({
   params,
 }: GetStaticPropsContext<{ slug: string }>): Promise<
   GetStaticPropsResult<{
     blog: BlogData;
   }>
 > {
+  console.log(params);
   if (!params)
     return {
       redirect: { destination: "/", permanent: false },
     };
   const slug = params.slug;
   const { status, blog, error } = await BlogApi.get(slug);
+  console.log("output", status, blog, error);
+
   if (status !== "success") {
     const redirect = new URLSearchParams({
       reason: error ?? `${slug}+blog+not+found`,

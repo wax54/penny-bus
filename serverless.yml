@@ -1,0 +1,289 @@
+service: bus-website
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  profile: home
+  versionFunctions: false
+  logRetentionInDays: 30
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  domains:
+    prod: pennybusproject.com
+  domain: ${self:custom.domains.${self:custom.stage}, '${self:custom.stage}.pennybusproject.com'}
+  staticAssetBucket: ${self:custom.stage}-${self:service}
+  esbuild:
+    bundle: true
+    minify: true
+    exclude:
+      - "*"
+    external:
+      - next
+
+package:
+  individually: true
+  patterns:
+    - "!./**"
+    - ".next"
+    - "node_modules"
+    - "public"
+    - "_next"
+    - "next.config.js"
+    - "next-i18next.config.js"
+    - "package.json"
+
+# package:
+#   individually: true
+#   patterns:
+#     - "!/**"
+#     - "public"
+#     - .next/**"
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+functions:
+  Render:
+    handler: ./Server.handler
+    role: BaseLambdaRole
+    events:
+      - http: ANY /
+      - http: ANY /{proxy+}
+
+resources:
+  Resources:
+    StaticAssetBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.staticAssetBucket}
+        AccessControl: PublicRead
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - HEAD
+              AllowedOrigins:
+                - "https://${self:custom.domain}"
+                - "https://www.${self:custom.domain}"
+              Id: staticAssetCorsRule
+              MaxAge: 0
+        # PublicAccessBlockConfiguration:
+        #   BlockPublicPolicy: false
+        #   RestrictPublicBuckets: false
+
+
+    BucketPolicyStaticAsset:
+      Type: 'AWS::S3::BucketPolicy'
+      Properties:
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: '*'
+              Action:
+                - 's3:GetObject'
+              Resource: arn:aws:s3:::${self:custom.staticAssetBucket}/*
+        Bucket:
+          Ref: StaticAssetBucket
+        # PolicyDocument:
+        #   Statement:
+        #     - Action:
+        #         - s3:ListBucket
+        #         - s3:GetObjectVersion
+        #         - s3:GetObject
+        #         - s3:GetBucketVersioning
+        #         - s3:GetBucketLocation
+        #         - s3:PutObject
+        #         - s3:GetObject
+        #         - s3:GetObjectVersion
+        #         - s3:GetObjectACL
+        #         - s3:PutObjectACL
+        #       Resource:
+        #         - arn:aws:s3:::${self:custom.staticAssetBucket}/*
+        #         - arn:aws:s3:::${self:custom.staticAssetBucket}
+        #       Effect: Allow
+        #       Principal:
+        #         Service: "cloudfront.amazonaws.com"
+                
+
+    CloudFront:
+      Type: AWS::CloudFront::Distribution
+      DependsOn:
+        - StaticAssetBucket
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          Origins:
+            - Id: render
+              CustomOriginConfig:
+                OriginProtocolPolicy: https-only
+              DomainName:
+                {
+                  "Fn::Join":
+                    [
+                      "",
+                      [
+                        { "Ref": "ApiGatewayRestApi" },
+                        ".execute-api.${self:provider.region}.amazonaws.com",
+                      ],
+                    ],
+                }
+              OriginPath: "/${self:custom.stage}"
+            - Id: bucket
+              DomainName: !GetAtt StaticAssetBucket.DomainName
+              S3OriginConfig:
+                OriginAccessIdentity: ""
+              OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+          Aliases:
+            - ${self:custom.domain}
+            - www.${self:custom.domain}
+          DefaultCacheBehavior:
+            AllowedMethods: ["GET", "HEAD", "OPTIONS"]
+            CachedMethods: ["HEAD", "GET"]
+            MinTTL: "0"
+            MaxTTL: "0"
+            DefaultTTL: "0"
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: all
+            TargetOriginId: render
+            ViewerProtocolPolicy: redirect-to-https
+          CacheBehaviors:
+            - AllowedMethods: ["GET", "HEAD", "OPTIONS"]
+              CachedMethods: ["HEAD", "GET"]
+              TargetOriginId: bucket
+              MinTTL: "0"
+              MaxTTL: "0"
+              DefaultTTL: "0"
+              ForwardedValues:
+                QueryString: false
+              ViewerProtocolPolicy: redirect-to-https
+              PathPattern: /_next/static/*
+          # CustomErrorResponses:
+          #   - ErrorCode: 404
+          #     ResponseCode: 200
+          #     ResponsePagePath: /_error
+          #   - ErrorCode: 403
+          #     ResponseCode: 200
+          #     ResponsePagePath: /_error
+          ViewerCertificate:
+            # TODO: Update regular cert to include nested subdomains
+            AcmCertificateArn: ${ssm:/sam-the-dev/global/ca-cert-pennybusproject-arn}
+            SslSupportMethod: sni-only
+
+    CloudFrontOriginAccessControl:
+      Type: AWS::CloudFront::OriginAccessControl
+      Properties:
+        OriginAccessControlConfig:
+          Description: "origin access control(OAC) for allowing cloudfront to access S3 bucket"
+          Name: static-hosting-OAC
+          OriginAccessControlOriginType: s3
+          SigningBehavior: always
+          SigningProtocol: sigv4
+
+    # OriginAccessIdentity:
+    #   Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    #   Properties:
+    #     CloudFrontOriginAccessIdentityConfig:
+    #       Comment: ${self:custom.domain}-access-id
+
+    # BucketPolicy:
+    #   Type: AWS::S3::BucketPolicy
+    #   Properties:
+    #     Bucket: 
+    #       Ref: StaticAssetBucket
+    #     PolicyDocument:
+    #       Version: "2012-10-17"
+    #       Statement:
+    #         - Sid: PublicReadGetObject
+    #           Effect: Allow
+    #           Principal:
+    #             Service: "cloudfront.amazonaws.com"
+    #           Action: "s3:GetObject"
+    #           Resource:
+    #             Fn::Join:
+    #               ["", ["arn:aws:s3:::", { "Ref": "StaticAssetBucket" }, "/*"]]
+    #           # Condition:
+    #           #   StringEquals:
+    #           #     AWS:SourceArn: !GetAtt CloudFront.arn
+    #               # !Sub "arn:aws:cloudfront::Id-of-IAM-User:distribution/${CloudFrontDistribution}"
+                  
+    # StaticAssetBucketPolicy:
+    #   Type: AWS::S3::BucketPolicy
+    #   Properties:
+    #     Bucket:
+    #       Ref: StaticAssetBucket
+    #     PolicyDocument:
+    #       Statement:
+    #         - Sid: PublicReadGetObject
+    #           Effect: Allow
+    #           Principal: 
+    #             Service: "cloudfront.amazonaws.com"
+    #           Action:
+    #             - s3:GetObject
+    #           Resource:
+    #             Fn::Join:
+    #               ["", ["arn:aws:s3:::", { "Ref": "StaticAssetBucket" }, "/*"]]
+
+    Record:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
+        Name: ${self:custom.domain}
+        Type: A
+        # TTL: 300
+        AliasTarget:
+          HostedZoneId: Z2FDTNDATAQYW2
+          DNSName: !GetAtt CloudFront.DomainName
+
+    # Record:
+    #   Type: AWS::Route53::RecordSet
+    #   Properties:
+    #     HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
+    #     Name: www.${self:custom.domain}
+    #     Type: A
+    #     # TTL: 300
+    #     AliasTarget:
+    #       HostedZoneId: Z2FDTNDATAQYW2
+    #       DNSName: !GetAtt CloudFront.DomainName
+    AliasRecord:
+      Type: AWS::Route53::RecordSet
+      DependsOn:
+        - Record
+      Properties:
+        HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
+        Name: www.${self:custom.domain}
+        Type: A
+        # TTL: 300
+        AliasTarget:
+          HostedZoneId: Z2FDTNDATAQYW2
+          DNSName: ${self.custom.domain}
+
+    BaseLambdaRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: RenderLambdaRole-${self:custom.stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - edgelambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: "LambdaRole-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - logs:*
+                  Resource: arn:aws:logs:*:*:*

@@ -5,6 +5,7 @@ export type BlogData = {
   body?: string[];
   author: string;
   bodyLink?: string;
+  isHidden?: boolean | {reason?: string, releaseDate?: string};
 } & ({body: string[]} | {bodyLink: string});
 
 export type BlogDate = {

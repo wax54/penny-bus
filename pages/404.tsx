@@ -10,7 +10,7 @@ export default function NotFound() {
     router.isReady &&
       router.query?.redirect &&
       setRedirect(router.query.redirect as string);
-  }, [router.query?.reason]);
+  }, [router.query?.reason, router.isReady, router.query?.redirect]);
   return (
     <div>
       <div>{value}</div>

@@ -1,4 +1,4 @@
-import { Nav as NavType } from "../constants/nav";
+import { NavItem } from "../constants/nav";
 import { StylesType } from "../constants/styles";
 import { Nav } from "./Nav";
 
@@ -6,7 +6,7 @@ export const Header = ({
   nav,
   styles,
 }: {
-  nav: NavType;
+  nav: NavItem[];
   styles: StylesType['page']
 }) => {
   return (

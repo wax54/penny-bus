@@ -1,9 +1,10 @@
 import { useRouter } from "next/router";
 import { isCurrentPage } from "../utils";
 import { useEffect, useState } from "react";
+import { NavItem } from "../constants/nav";
 
 export const Nav = (props: {
-  nav: readonly { href: string; text: string, isActive?: boolean }[];
+  nav: (NavItem & { isCurrPage?: boolean })[];
   styles: { main: any; a: any };
 }) => {
   const router = useRouter();
@@ -11,25 +12,28 @@ export const Nav = (props: {
   useEffect(() => {
     if (router.isReady) {
       setNav((items) =>
-        items.map((item) => ({ ...item, isActive: isCurrentPage(item.href) }))
+        items.map((item) => ({ ...item, isCurrPage: isCurrentPage(item.href) }))
       );
     }
   }, [router.isReady]);
   return (
-    <div id="nav"
+    <div
+      id="nav"
       // style={styles.main}
     >
-      {nav.map((item) => (
-        <a
-          key={item.href}
-          href={item.href}
-          className={` text-textSecondary m-1 py-2 px-5 rounded-[10px] hover:bg-secondary ${
-            item.isActive ? "!bg-primary !text-text" : ""
-          }`}
-        >
-          {item.text}
-        </a>
-      ))}
+      {nav.map((item) =>
+        item.isActive ? (
+          <a
+            key={item.href}
+            href={item.href}
+            className={` text-textSecondary m-1 py-2 px-5 rounded-[10px] hover:bg-secondary ${
+              item.isCurrPage ? "!bg-primary !text-text" : ""
+            }`}
+          >
+            {item.text}
+          </a>
+        ) : null
+      )}
     </div>
   );
 };

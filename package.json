@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dist:create": "./create-dist.sh",
+    "deploy:prod": "npm run dist:create prod && cd .dist && npm run sls:deploy:prod && cd ../ && npm run sync:static:prod && npm run flush:prod",
+    "sls:deploy:prod": "sls deploy --stage prod --verbose",
+    "sync:static:prod": "aws s3 sync .next/static s3://prod-bus-website/_next/static/",
+    "flush:prod": "aws cloudfront create-invalidation --distribution-id EV003T103RYK --paths \"/*\""
   },
   "dependencies": {
     "@types/node": "20.2.5",
@@ -18,6 +23,9 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-markdown": "^8.0.7",
+    "serverless-esbuild": "^1.45.1",
+    "serverless-http": "^3.2.0",
+    "serverless-offline": "^12.0.4",
     "typescript": "5.0.4"
   },
   "devDependencies": {
