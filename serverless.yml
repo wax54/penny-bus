@@ -51,6 +51,17 @@ functions:
     events:
       - http: ANY /
       - http: ANY /{proxy+}
+  Update:
+    handler: ./Update.handler
+    role: BaseLambdaRole
+    individually: true
+    package:
+      - "!./**"
+    events:
+      - http:
+          method: PUT
+          path: api/update
+          cors: true
 
 resources:
   Resources:
@@ -62,7 +73,7 @@ resources:
         CorsConfiguration:
           CorsRules:
             - AllowedHeaders:
-                - '*'
+                - "*"
               AllowedMethods:
                 - GET
                 - HEAD
@@ -75,17 +86,16 @@ resources:
         #   BlockPublicPolicy: false
         #   RestrictPublicBuckets: false
 
-
     BucketPolicyStaticAsset:
-      Type: 'AWS::S3::BucketPolicy'
+      Type: "AWS::S3::BucketPolicy"
       Properties:
         PolicyDocument:
           Statement:
             - Sid: PublicReadForGetBucketObjects
               Effect: Allow
-              Principal: '*'
+              Principal: "*"
               Action:
-                - 's3:GetObject'
+                - "s3:GetObject"
               Resource: arn:aws:s3:::${self:custom.staticAssetBucket}/*
         Bucket:
           Ref: StaticAssetBucket
@@ -108,7 +118,6 @@ resources:
         #       Effect: Allow
         #       Principal:
         #         Service: "cloudfront.amazonaws.com"
-                
 
     CloudFront:
       Type: AWS::CloudFront::Distribution
@@ -119,6 +128,21 @@ resources:
           Enabled: true
           Origins:
             - Id: render
+              CustomOriginConfig:
+                OriginProtocolPolicy: https-only
+              DomainName:
+                {
+                  "Fn::Join":
+                    [
+                      "",
+                      [
+                        { "Ref": "ApiGatewayRestApi" },
+                        ".execute-api.${self:provider.region}.amazonaws.com",
+                      ],
+                    ],
+                }
+              OriginPath: "/${self:custom.stage}"
+            - Id: api
               CustomOriginConfig:
                 OriginProtocolPolicy: https-only
               DomainName:
@@ -164,6 +188,25 @@ resources:
                 QueryString: false
               ViewerProtocolPolicy: redirect-to-https
               PathPattern: /_next/static/*
+            - AllowedMethods: [HEAD, DELETE, POST, GET, OPTIONS, PUT, PATCH]
+              TargetOriginId: api
+              MinTTL: "0"
+              MaxTTL: "0"
+              DefaultTTL: "0"
+              ForwardedValues:
+                QueryString: false
+              ViewerProtocolPolicy: redirect-to-https
+              PathPattern: /api/*
+            - AllowedMethods: ["GET", "HEAD", "OPTIONS"]
+              CachedMethods: ["HEAD", "GET"]
+              TargetOriginId: bucket
+              MinTTL: "0"
+              MaxTTL: "0"
+              DefaultTTL: "0"
+              ForwardedValues:
+                QueryString: false
+              ViewerProtocolPolicy: redirect-to-https
+              PathPattern: /db/*
           # CustomErrorResponses:
           #   - ErrorCode: 404
           #     ResponseCode: 200
@@ -195,7 +238,7 @@ resources:
     # BucketPolicy:
     #   Type: AWS::S3::BucketPolicy
     #   Properties:
-    #     Bucket: 
+    #     Bucket:
     #       Ref: StaticAssetBucket
     #     PolicyDocument:
     #       Version: "2012-10-17"
@@ -212,7 +255,7 @@ resources:
     #           #   StringEquals:
     #           #     AWS:SourceArn: !GetAtt CloudFront.arn
     #               # !Sub "arn:aws:cloudfront::Id-of-IAM-User:distribution/${CloudFrontDistribution}"
-                  
+
     # StaticAssetBucketPolicy:
     #   Type: AWS::S3::BucketPolicy
     #   Properties:
@@ -222,7 +265,7 @@ resources:
     #       Statement:
     #         - Sid: PublicReadGetObject
     #           Effect: Allow
-    #           Principal: 
+    #           Principal:
     #             Service: "cloudfront.amazonaws.com"
     #           Action:
     #             - s3:GetObject
@@ -238,31 +281,21 @@ resources:
         Type: A
         # TTL: 300
         AliasTarget:
-          HostedZoneId: Z2FDTNDATAQYW2
+          HostedZoneId: Z2FDTNDATAQYW2 # Seemingly random id
           DNSName: !GetAtt CloudFront.DomainName
 
-    # Record:
+    # AliasRecord:
     #   Type: AWS::Route53::RecordSet
+    #   DependsOn:
+    #     - Record
     #   Properties:
     #     HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
     #     Name: www.${self:custom.domain}
     #     Type: A
     #     # TTL: 300
     #     AliasTarget:
-    #       HostedZoneId: Z2FDTNDATAQYW2
-    #       DNSName: !GetAtt CloudFront.DomainName
-    AliasRecord:
-      Type: AWS::Route53::RecordSet
-      DependsOn:
-        - Record
-      Properties:
-        HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
-        Name: www.${self:custom.domain}
-        Type: A
-        # TTL: 300
-        AliasTarget:
-          HostedZoneId: Z2FDTNDATAQYW2
-          DNSName: ${self.custom.domain}
+    #       HostedZoneId: Z2FDTNDATAQYW2 # Seemingly random id
+    #       DNSName: ${self.custom.domain}
 
     BaseLambdaRole:
       Type: "AWS::IAM::Role"

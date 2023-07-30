@@ -19,11 +19,17 @@ export const BlogApi = {
   > => {
     const blog = db.blog[slug];
     if (blog.bodyLink) {
-      const blogBodyUrl = new URL(blog.bodyLink, process.env.NEXT_SITE_URL);
+      const blogBodyUrl = new URL(
+        blog.bodyLink ?? "/db/blog-article/" + slug + ".md",
+        process.env.NEXT_PUBLIC_SITE_URL
+      );
       try {
         const res = await fetch(blogBodyUrl);
         const body = await res.text();
-        blog.body = body.split("\n");
+        if (body) {
+          console.log("bpyddda####", body);
+          blog.body = body;
+        }
       } catch (e) {
         logger(e, "ERROR");
       }
@@ -33,7 +39,7 @@ export const BlogApi = {
     if (!blog) return { status: "failed", error: "Blog not found" };
     return { status: "success", blog };
   },
-// V2
+  // V2
   isViewable: (blog: BlogData): boolean => {
     if (
       blog.isHidden &&
@@ -49,14 +55,29 @@ export const BlogApi = {
     return true;
   },
 
-  // V1
-  // isViewable: (blog: BlogData): boolean => {
-  //   const doesArrivalExist = blog?.date?.arrival ? true : false;
-  //   const isHidden =
-  //     blog.isHidden &&
-  //     (blog.isHidden === true ||
-  //       (blog.isHidden.releaseDate &&
-  //         new Date(blog.isHidden.releaseDate) > new Date()));
-  //   return !isHidden && doesArrivalExist;
-  // },
+  update: async (
+    slug: string,
+    newBody: string
+  ): Promise<{ success: boolean } & any> => {
+    console.log("NE", process.env.NEXT_PUBLIC_SITE_URL)
+      const updateUrl = new URL("/api/update",process.env.NEXT_PUBLIC_SITE_URL);
+      try {
+        const res = await fetch(updateUrl, {
+          method: 'PUT',
+          body: JSON.stringify({
+            blog: {
+              slug: slug,
+              body: newBody,
+            }
+          }),
+        });
+        const body = await res.json();
+        console.log(body)
+        return body; 
+      } catch (e) {
+        logger(e);
+        console.log(e);
+        return {success: false, error: 'unknown'}
+    }
+  },
 };

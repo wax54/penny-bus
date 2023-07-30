@@ -26,8 +26,8 @@ export const Nav = (props: {
           <a
             key={item.href}
             href={item.href}
-            className={` text-textSecondary m-1 py-2 px-5 rounded-[10px] hover:bg-secondary ${
-              item.isCurrPage ? "!bg-primary !text-text" : ""
+            className={` text-textPrimary m-1 py-2 px-5 rounded-[10px] hover:bg-secondary hover:text-textSecondary ${
+              item.isCurrPage ? "bg-primary" : ""
             }`}
           >
             {item.text}

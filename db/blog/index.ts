@@ -48,7 +48,7 @@ export default {
       departure: "2023-06-24T09:30:00.000-07:00",
     },
     author: "Sam Crewe-Sullam",
-    bodyLink: "/db/tish-tang-campground.md",
+    bodyLink: "/db/blog-articles/tish-tang-campground.md",
   },
 
   "lagoon-campground": {

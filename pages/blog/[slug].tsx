@@ -10,17 +10,10 @@ import { nav } from "../../constants/nav";
 import { BlogDate, BlogData } from "../../types";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
-import { CSSProperties } from "react";
-import { brandColors } from "../../constants/colors";
 import { BlogApi } from "../../api";
 
-function BlogPost({
-  blog,
-  style,
-}: {
-  blog: BlogData;
-  style: { main: CSSProperties; author: CSSProperties };
-}) {
+export function BlogPost({ blog }: { blog: BlogData }) {
+  console.log(blog);
   function DateStamp({ date }: { date: BlogDate }) {
     function getStayLength(lengthMS: number) {
       let hours = Math.round(lengthMS / 1000 / 60 / 60);
@@ -65,98 +58,65 @@ function BlogPost({
     );
   }
   return (
-    <div style={style.main}>
-      <h1>{blog.title}</h1>
-      <h2>{blog.subtitle}</h2>
-      <div className="pb-10">
-        <DateStamp date={blog.date} />
+    <>
+      <div className="bg-accent/30 text-white mt-[20px] p-10 rounded-ss-[100px]">
+        <h1>{blog.title}</h1>
+        <h2>{blog.subtitle}</h2>
+        <div className="pb-10">
+          <DateStamp date={blog.date} />
+        </div>
+        {blog.body ? (
+          <ReactMarkdown className="">
+            {blog.body.replace(/\n/gi, "\n &nbsp;  \n  ")}
+          </ReactMarkdown>
+        ) : null}
+        <p
+          style={{
+            padding: 10,
+          }}
+        >
+          <em>Author: {blog.author}</em>
+        </p>
       </div>
-      {blog.body?.map((text, i) => (
-        <ReactMarkdown key={i}>{text}</ReactMarkdown>
-      ))}
-      <p style={style.author}>
-        <em>Author: {blog.author}</em>
-      </p>
-    </div>
+    </>
   );
 }
 
 export default function Blog({
   blog,
-}: InferGetStaticPropsType<typeof getServerSideProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) {
   if (!blog) {
-    return <div>LOADING!</div>
+    return <div>LOADING!</div>;
   }
   return (
-    <Layout
-      nav={nav}
-      style={{
-        ...styles,
-        page: {
-          ...styles.page,
-          view: {
-            ...styles.page.view,
-            backgroundColor: brandColors.white,
-          },
-          header: {
-            ...styles.page.header,
-            backgroundColor: brandColors.accent,
-            borderBottomLeftRadius: 100,
-            borderBottomRightRadius: 0,
-            padding: 20,
-          },
-          sideBar: {
-            backgroundColor: brandColors.accent,
-            float: "right",
-            width: 100,
-            height: 400,
-          },
-        },
-      }}
-    >
-      <BlogPost
-        blog={blog}
-        style={{
-          main: {
-            borderTopLeftRadius: 100,
-            padding: 20,
-            marginTop: 50,
-            paddingLeft: 80,
-            color: brandColors.white,
-            backgroundColor: brandColors.accent,
-          },
-          author: {
-            padding: 10,
-          },
-        }}
-      />
+    <Layout nav={nav} style={styles}>
+      <BlogPost blog={blog} />
     </Layout>
   );
 }
-// export async function getStaticPaths({}: GetStaticPathsContext): Promise<GetStaticPathsResult> {
-//   const blogs = await BlogApi.getAll();
-//   const keys = blogs.map((blog) => ({ params: { slug: blog.key } }));
-//   console.log(keys);
-//   return {
-//     paths: keys,
-//     fallback: 'blocking',
-//   };
-// }
-export async function getServerSideProps({
+export async function getStaticPaths({}: GetStaticPathsContext): Promise<GetStaticPathsResult> {
+  const blogs = await BlogApi.getAll();
+  const keys = blogs.map((blog) => ({ params: { slug: blog.key } }));
+  console.log(keys);
+  return {
+    paths: keys,
+    fallback: "blocking",
+  };
+}
+export async function getStaticProps({
   params,
 }: GetStaticPropsContext<{ slug: string }>): Promise<
   GetStaticPropsResult<{
     blog: BlogData;
+    slug: string;
   }>
 > {
-  console.log(params);
   if (!params)
     return {
       redirect: { destination: "/", permanent: false },
     };
   const slug = params.slug;
   const { status, blog, error } = await BlogApi.get(slug);
-  console.log("output", status, blog, error);
 
   if (status !== "success") {
     const redirect = new URLSearchParams({
@@ -170,5 +130,5 @@ export async function getServerSideProps({
       },
     };
   }
-  return { props: { blog } };
+  return { props: { blog, slug } };
 }

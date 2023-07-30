@@ -26,14 +26,6 @@ export const styles = {
       backgroundSize: "cover",
       position: "relative",
     },
-    view: {
-      position: "absolute",
-      top: '0px',
-      bottom: '0px',
-      left: '0px',
-      right: '0px',
-      backgroundColor: brandColors.offWhite,
-    },
     header: {
       textAlign: "center",
     },

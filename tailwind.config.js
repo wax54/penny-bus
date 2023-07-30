@@ -10,15 +10,15 @@ module.exports = {
   ],
   theme: {
     extend: {
-
       colors: {
-        'text': '#000000',
+        'textPrimary': '#000000',
         'textSecondary': '#FFFFFF',
         'textAccent': '#FFFF00',
         'primary': '#EEFFEE',
         'secondary': '#EE9999',
         'accent': '#99EE99',
         'secondaryAccent': '#EEFFEE',
+        'offWhite': 'rgba(0,0,0,0.3)'
       },
     },
   },
