@@ -1,6 +1,11 @@
 // pages/_app.js
-import '../globals.css'
+import { useEffect } from "react";
+import "../globals.css";
+import packgeJSON from "../package.json";
 
 export default function MyApp({ Component, pageProps }: any) {
-  return <Component {...pageProps} />
+  useEffect(() => {
+    console.log("welcome to V" + packgeJSON.version);
+  }, []);
+  return <Component {...pageProps} />;
 }

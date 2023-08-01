@@ -1,32 +1,50 @@
 import { InferGetStaticPropsType } from "next";
 import * as publicSingleBlogPage from "../../blog/[slug]";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import { useEffect, useState } from "react";
+// import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BlogApi } from "../../../api";
+import { BlogData } from "../../../types";
 
-export const getStaticPaths = publicSingleBlogPage.getStaticPaths;
-export const getStaticProps = publicSingleBlogPage.getStaticProps;
+// export const getStaticPaths = publicSingleBlogPage.getStaticPaths;
+export const getServerSideProps = publicSingleBlogPage.getStaticProps;
 
 export const UpdateBlog = ({
   blog,
   slug,
-}: InferGetStaticPropsType<typeof getStaticProps>) => {
+}: InferGetStaticPropsType<typeof getServerSideProps>) => {
+  const blogRef = useRef(blog);
   const [currBlog, setCurrBlog] = useState(blog);
   const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    console.log("EFFECT");
-    setLoading(true);
-    BlogApi.update(slug, currBlog.body ?? "")
-      .then((resp) => {
-        setLoading(false);
-      })
-      .catch((e) => setLoading(false));
-  }, [currBlog.body, setLoading]);
+  const inSync = currBlog.body === blogRef.current.body;
+  const updateBlog = useCallback(
+    (updatedBlog: Pick<BlogData, "body">) => {
+      console.log("UPDATING", updatedBlog);
+      setLoading(true);
+      BlogApi.update(slug, updatedBlog.body ?? "")
+        .then((resp) => {
+          setLoading(false);
+          blogRef.current = { ...blogRef.current, ...updatedBlog };
+        })
+        .catch((e) => setLoading(false));
+    },
+    [slug, currBlog.body, setLoading]
+  );
   return (
     <div className="bg-offWhite flex">
       <div className="p-4 flex-1">
-        <div className="h-[20px] bg-accent">
-          {loading ? "SYNCING" : "IN SYNC"}
+        <div className="h-[20px]">
+          {loading ? (
+            <div className="bg-secondary">LOADING</div>
+          ) : inSync ? (
+            <div className="bg-accent">IN SYNC</div>
+          ) : (
+            <button
+              className="bg-primary "
+              onClick={() => updateBlog(currBlog)}
+            >
+              SYNC NOW
+            </button>
+          )}
         </div>
 
         <input

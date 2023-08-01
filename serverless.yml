@@ -23,7 +23,7 @@ custom:
       - next
 
 package:
-  individually: true
+  # individually: true
   patterns:
     - "!./**"
     - ".next"
@@ -33,7 +33,6 @@ package:
     - "next.config.js"
     - "next-i18next.config.js"
     - "package.json"
-
 # package:
 #   individually: true
 #   patterns:
@@ -53,10 +52,7 @@ functions:
       - http: ANY /{proxy+}
   Update:
     handler: ./Update.handler
-    role: BaseLambdaRole
-    individually: true
-    package:
-      - "!./**"
+    role: PutBlogsLambdaRole
     events:
       - http:
           method: PUT
@@ -320,3 +316,38 @@ resources:
                   Action:
                     - logs:*
                   Resource: arn:aws:logs:*:*:*
+
+    PutBlogsLambdaRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: PutBlogsLambdaRole-${self:custom.stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - edgelambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: "LambdaRole-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - logs:*
+                  Resource: arn:aws:logs:*:*:*
+
+          - PolicyName: "PutBusSiteDB"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - s3:PutObject
+                  Resource: 
+                    - arn:aws:s3:::${self:custom.staticAssetBucket}/db/*
+                    - arn:aws:s3:::${self:custom.staticAssetBucket}/db/

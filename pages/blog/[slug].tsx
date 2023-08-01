@@ -67,7 +67,7 @@ export function BlogPost({ blog }: { blog: BlogData }) {
         </div>
         {blog.body ? (
           <ReactMarkdown className="">
-            {blog.body.replace(/\n/gi, "\n &nbsp;  \n  ")}
+            {blog.body ? blog.body.replace(/\n/gi, "\n &nbsp;  \n  ") : 'PRE RENDER'}
           </ReactMarkdown>
         ) : null}
         <p
@@ -97,7 +97,6 @@ export default function Blog({
 export async function getStaticPaths({}: GetStaticPathsContext): Promise<GetStaticPathsResult> {
   const blogs = await BlogApi.getAll();
   const keys = blogs.map((blog) => ({ params: { slug: blog.key } }));
-  console.log(keys);
   return {
     paths: keys,
     fallback: "blocking",
