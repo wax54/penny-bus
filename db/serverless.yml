@@ -1,0 +1,82 @@
+service: table-service
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  profile: home
+  versionFunctions: false
+  logRetentionInDays: 30
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  deletionPolicies: #dynamoDB deletion policy
+    dev: Retain
+    prod: Retain
+  deletionPolicy: ${self:custom.deletionPolicies.${self:custom.stage}, 'Delete'}
+
+resources:
+  Resources:
+    PennyTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.deletionPolicy}
+      Properties:
+        TableName: Penny-${self:custom.stage}
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1-PK
+            AttributeType: S
+          - AttributeName: GSI1-SK
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1-PK
+                KeyType: HASH
+              - AttributeName: GSI1-SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
+        # StreamSpecification:
+        #   StreamViewType: NEW_AND_OLD_IMAGES
+    PennyTableName:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /penny/${self:custom.stage}/dynamo/PennyTable/name
+        Type: String
+        Value: !Ref PennyTable
+
+    PennyTableArn:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /penny/${self:custom.stage}/dynamo/PennyTable/arn
+        Type: String
+        Value: !GetAtt PennyTable.Arn
+
+    # PennyTableStreamArn:
+    #   Type: AWS::SSM::Parameter
+    #   Properties:
+    #     Name: /penny/${self:custom.stage}/dynamo/relationTable/streamArn
+    #     Type: String
+    #     Value: !GetAtt PennyTable.StreamArn
+  Outputs:
+    PennyTableName:
+      Value:
+        Ref: PennyTable
+      Export:
+        Name: ExtPennyTableName-${self:custom.stage}

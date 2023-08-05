@@ -8,7 +8,9 @@ import * as publicSingleBlogPage from "../../blog/[slug]";
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BlogApi } from "../../../api";
-import { BlogData } from "../../../types";
+import { BlogData, BlogKeyComponents } from "../../../types";
+import { PARTITIONS } from "../../../backend/utils/busTable";
+import { NEW_BLOG_SLUG } from "../../../constants/config";
 
 // export const getStaticPaths = publicSingleBlogPage.getStaticPaths;
 export const getServerSideProps = (
@@ -25,12 +27,12 @@ export const UpdateBlog = ({
     blog
       ? blog
       : ({
+          type: PARTITIONS.BLOG,
+          slug: "",
           title: "",
           subtitle: "",
-          date: {
-            arrival: "",
-            departure: "",
-          },
+          arrival: "",
+          departure: "",
           body: "",
           author: "",
           fee: 0,
@@ -41,20 +43,23 @@ export const UpdateBlog = ({
   const [loading, setLoading] = useState(false);
   const inSync = currBlog.body === blogRef.current.body;
   const updateBlog = useCallback(
-    (updatedBlog: Pick<BlogData, "body">) => {
+    (updatedBlog: BlogData & BlogKeyComponents) => {
       console.log("UPDATING", updatedBlog);
       setLoading(true);
-      BlogApi.update(slug, updatedBlog.body ?? "")
+      const manipulation =
+        slug === NEW_BLOG_SLUG ? BlogApi.create : BlogApi.update;
+      manipulation({ ...updatedBlog })
         .then((resp) => {
+          console.log(resp);
           setLoading(false);
           blogRef.current = { ...blogRef.current, ...updatedBlog };
         })
         .catch((e) => setLoading(false));
     },
-    [slug, currBlog.body, setLoading]
+    [slug, setLoading]
   );
   return (
-    <div className="bg-offWhite flex">
+    <div className="bg-offWhite flex flex-column sm:flex-row">
       <div className="p-4 flex-1">
         <div className="h-[20px]">
           {loading ? (
@@ -70,6 +75,21 @@ export const UpdateBlog = ({
             </button>
           )}
         </div>
+
+        <input
+          name="slug"
+          disabled={slug !== NEW_BLOG_SLUG}
+          className="my-4 p-4 w-full"
+          placeholder="Slug"
+          value={currBlog.title}
+          onChange={(evt) => {
+            const { value, name } = evt.target;
+            setCurrBlog((blog) => ({
+              ...blog,
+              [name]: value.replace(/\s/, ""),
+            }));
+          }}
+        />
 
         <input
           name="title"
@@ -110,27 +130,26 @@ export const UpdateBlog = ({
             type="datetime-local"
             placeholder="Arrival"
             className="my-4 p-4 w-full"
-            value={currBlog.date.arrival}
+            value={currBlog.arrival}
             onChange={(evt) => {
               const { value, name } = evt.target;
               setCurrBlog((blog) => ({
                 ...blog,
-                date: { ...blog.date, [name]: value },
+                [name]: value,
               }));
             }}
           />
-
           <input
             name="departure"
             type="datetime-local"
             placeholder="Departure"
             className="my-4 p-4 w-full"
-            value={currBlog.date.departure}
+            value={currBlog.departure}
             onChange={(evt) => {
               const { value, name } = evt.target;
               setCurrBlog((blog) => ({
                 ...blog,
-                date: { ...blog.date, [name]: value },
+                [name]: value,
               }));
             }}
           />
@@ -150,12 +169,12 @@ export const UpdateBlog = ({
           name="author"
           className="my-4 p-4 w-full"
           placeholder="Author"
-          value={currBlog.date.departure}
+          value={currBlog.author}
           onChange={(evt) => {
             const { value, name } = evt.target;
             setCurrBlog((blog) => ({
               ...blog,
-              date: { ...blog.date, [name]: value },
+              [name]: value,
             }));
           }}
         >

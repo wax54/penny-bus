@@ -7,15 +7,19 @@ import {
 } from "next";
 import { Layout } from "../../components/Layout";
 import { nav } from "../../constants/nav";
-import { BlogDate, BlogData } from "../../types";
+import { BlogData } from "../../types";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
 import { BlogApi } from "../../api";
 import { NEW_BLOG_SLUG } from "../../constants/config";
+import { PARTITIONS } from "../../backend/utils/busTable";
 
 export function BlogPost({ blog }: { blog: BlogData }) {
   console.log(blog);
-  function DateStamp({ date }: { date: BlogDate }) {
+  function DateStamp({
+    arrival,
+    departure,
+  }: Pick<BlogData, "arrival" | "departure">) {
     function getStayLength(lengthMS: number) {
       let hours = Math.round(lengthMS / 1000 / 60 / 60);
       let days = 0;
@@ -35,14 +39,14 @@ export function BlogPost({ blog }: { blog: BlogData }) {
       <div>
         <p>
           Arrived:{" "}
-          {new Date(date.arrival).toLocaleString("en-US", {
+          {new Date(arrival).toLocaleString("en-US", {
             dateStyle: "full",
             timeStyle: "long",
           })}
         </p>
         <p>
           Departed:{" "}
-          {new Date(date.departure).toLocaleString("en-US", {
+          {new Date(departure).toLocaleString("en-US", {
             dateStyle: "full",
             timeStyle: "long",
           })}
@@ -51,8 +55,7 @@ export function BlogPost({ blog }: { blog: BlogData }) {
         <p>
           Stay length:{" "}
           {getStayLength(
-            new Date(date.departure).getTime() -
-              new Date(date.arrival).getTime()
+            new Date(departure).getTime() - new Date(arrival).getTime()
           )}
         </p>
       </div>
@@ -64,7 +67,7 @@ export function BlogPost({ blog }: { blog: BlogData }) {
         <h1>{blog.title}</h1>
         <h2>{blog.subtitle}</h2>
         <div className="pb-10">
-          <DateStamp date={blog.date} />
+          <DateStamp {...blog} />
         </div>
         {blog.body ? (
           <ReactMarkdown className="">
@@ -123,9 +126,12 @@ export async function getStaticProps(
   if (admin && slug === NEW_BLOG_SLUG) {
     return { props: { slug, admin } };
   }
-  const { status, blog, error } = await BlogApi.get(slug);
+  const { success, data, error } = await BlogApi.get({
+    type: PARTITIONS.BLOG,
+    slug,
+  });
 
-  if (status !== "success") {
+  if (!success) {
     const redirect = new URLSearchParams({
       reason: error ?? `${slug}+blog+not+found`,
       redirect: `/blog/${slug}`,
@@ -137,5 +143,5 @@ export async function getStaticProps(
       },
     };
   }
-  return { props: { blog, slug } };
+  return { props: { blog: data, slug } };
 }

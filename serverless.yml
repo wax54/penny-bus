@@ -7,17 +7,15 @@ provider:
   profile: home
   versionFunctions: false
   logRetentionInDays: 30
-
+  environment:
+    BUS_TABLE: !ImportValue ${self:custom.sstApp}-ExtPennyTableName-${self:custom.stage}
 custom:
   stage: ${opt:stage, self:provider.stage}
   domains:
     prod: pennybusproject.com
+    dev: dev.pennybusproject.com
   domain: ${self:custom.domains.${self:custom.stage}, '${self:custom.stage}.pennybusproject.com'}
   staticAssetBucket: ${self:custom.stage}-${self:service}
-  deletionPolicies: #dynamoDB deletion policy
-    dev: Retain
-    prod: Retain
-  deletionPolicy: ${self:custom.deletionPolicies.${self:custom.stage}, 'Delete'}
   esbuild:
     bundle: true
     minify: true
@@ -54,80 +52,14 @@ functions:
     events:
       - http: ANY /
       - http: ANY /{proxy+}
-  Update:
-    handler: ./Update.handler
-    role: PutBlogsLambdaRole
-    events:
-      - http:
-          method: PUT
-          path: api/update
-          cors: true
 
 resources:
   Resources:
-    PennyTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.deletionPolicy}
-      Properties:
-        TableName: Penny-${self:custom.stage}
-        KeySchema:
-          - AttributeName: PK
-            KeyType: HASH
-          - AttributeName: SK
-            KeyType: RANGE
-        AttributeDefinitions:
-          - AttributeName: PK
-            AttributeType: S
-          - AttributeName: SK
-            AttributeType: S
-          - AttributeName: GSI1-PK
-            AttributeType: S
-          - AttributeName: GSI1-SK
-            AttributeType: S
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        GlobalSecondaryIndexes:
-          - IndexName: GSI1
-            KeySchema:
-              - AttributeName: GSI1-PK
-                KeyType: HASH
-              - AttributeName: GSI1-SK
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
-
-        # StreamSpecification:
-        #   StreamViewType: NEW_AND_OLD_IMAGES
-    PennyTableName:
-      Type: AWS::SSM::Parameter
-      Properties:
-        Name: /penny/${self:custom.stage}/dynamo/PennyTable/name
-        Type: String
-        Value: !Ref PennyTable
-
-    PennyTableArn:
-      Type: AWS::SSM::Parameter
-      Properties:
-        Name: /penny/${self:custom.stage}/dynamo/PennyTable/arn
-        Type: String
-        Value: !GetAtt PennyTable.Arn
-
-    # PennyTableStreamArn:
-    #   Type: AWS::SSM::Parameter
-    #   Properties:
-    #     Name: /penny/${self:custom.stage}/dynamo/relationTable/streamArn
-    #     Type: String
-    #     Value: !GetAtt PennyTable.StreamArn
-
     StaticAssetBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.staticAssetBucket}
-        AccessControl: PublicRead
+        # AccessControl: PublicRead
         CorsConfiguration:
           CorsRules:
             - AllowedHeaders:
@@ -138,44 +70,44 @@ resources:
               AllowedOrigins:
                 - "https://${self:custom.domain}"
                 - "https://www.${self:custom.domain}"
-              Id: staticAssetCorsRule
+              Id: staticAssetCorsRule-${self:custom.stage}
               MaxAge: 0
-        # PublicAccessBlockConfiguration:
-        #   BlockPublicPolicy: false
-        #   RestrictPublicBuckets: false
+        PublicAccessBlockConfiguration:
+          BlockPublicPolicy: false
+          RestrictPublicBuckets: false
 
-    BucketPolicyStaticAsset:
-      Type: "AWS::S3::BucketPolicy"
-      Properties:
-        PolicyDocument:
-          Statement:
-            - Sid: PublicReadForGetBucketObjects
-              Effect: Allow
-              Principal: "*"
-              Action:
-                - "s3:GetObject"
-              Resource: arn:aws:s3:::${self:custom.staticAssetBucket}/*
-        Bucket:
-          Ref: StaticAssetBucket
-        # PolicyDocument:
-        #   Statement:
-        #     - Action:
-        #         - s3:ListBucket
-        #         - s3:GetObjectVersion
-        #         - s3:GetObject
-        #         - s3:GetBucketVersioning
-        #         - s3:GetBucketLocation
-        #         - s3:PutObject
-        #         - s3:GetObject
-        #         - s3:GetObjectVersion
-        #         - s3:GetObjectACL
-        #         - s3:PutObjectACL
-        #       Resource:
-        #         - arn:aws:s3:::${self:custom.staticAssetBucket}/*
-        #         - arn:aws:s3:::${self:custom.staticAssetBucket}
-        #       Effect: Allow
-        #       Principal:
-        #         Service: "cloudfront.amazonaws.com"
+    # BucketPolicyStaticAsset:
+    #   Type: "AWS::S3::BucketPolicy"
+    #   Properties:
+    #     PolicyDocument:
+    #       Statement:
+    #         - Sid: PublicReadForGetBucketObjects
+    #           Effect: Allow
+    #           Principal: "*"
+    #           Action:
+    #             - "s3:GetObject"
+    #           Resource: arn:aws:s3:::${self:custom.staticAssetBucket}/*
+    #     Bucket:
+    #       Ref: StaticAssetBucket
+    # PolicyDocument:
+    #   Statement:
+    #     - Action:
+    #         - s3:ListBucket
+    #         - s3:GetObjectVersion
+    #         - s3:GetObject
+    #         - s3:GetBucketVersioning
+    #         - s3:GetBucketLocation
+    #         - s3:PutObject
+    #         - s3:GetObject
+    #         - s3:GetObjectVersion
+    #         - s3:GetObjectACL
+    #         - s3:PutObjectACL
+    #       Resource:
+    #         - arn:aws:s3:::${self:custom.staticAssetBucket}/*
+    #         - arn:aws:s3:::${self:custom.staticAssetBucket}
+    #       Effect: Allow
+    #       Principal:
+    #         Service: "cloudfront.amazonaws.com"
 
     CloudFront:
       Type: AWS::CloudFront::Distribution
@@ -282,7 +214,7 @@ resources:
       Properties:
         OriginAccessControlConfig:
           Description: "origin access control(OAC) for allowing cloudfront to access S3 bucket"
-          Name: static-hosting-OAC
+          Name: static-hosting-OAC-${self:custom.stage}
           OriginAccessControlOriginType: s3
           SigningBehavior: always
           SigningProtocol: sigv4
@@ -378,38 +310,3 @@ resources:
                   Action:
                     - logs:*
                   Resource: arn:aws:logs:*:*:*
-
-    PutBlogsLambdaRole:
-      Type: "AWS::IAM::Role"
-      Properties:
-        RoleName: PutBlogsLambdaRole-${self:custom.stage}
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: "Allow"
-              Principal:
-                Service:
-                  - lambda.amazonaws.com
-                  - edgelambda.amazonaws.com
-              Action:
-                - sts:AssumeRole
-        Policies:
-          - PolicyName: "LambdaRole-Policy"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: "Allow"
-                  Action:
-                    - logs:*
-                  Resource: arn:aws:logs:*:*:*
-
-          - PolicyName: "PutBusSiteDB"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: "Allow"
-                  Action:
-                    - s3:PutObject
-                  Resource:
-                    - arn:aws:s3:::${self:custom.staticAssetBucket}/db/*
-                    - arn:aws:s3:::${self:custom.staticAssetBucket}/db/

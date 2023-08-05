@@ -1,6 +1,6 @@
 import db from "../db";
 import { logger } from "../logger";
-import { BlogData } from "../types";
+import { BlogData, BlogKeyComponents } from "../types";
 
 export const BlogApi = {
   getAll: async () => {
@@ -11,33 +11,30 @@ export const BlogApi = {
         blog: db.blog[key],
       }));
   },
-  get: async (
-    slug: string
-  ): Promise<
-    | { status: "success"; blog: BlogData; error?: undefined }
-    | { status: "failed"; error: string; blog?: undefined }
+  get: async ({
+    type,
+    slug,
+  }: BlogKeyComponents): Promise<
+    | { success: true; data: BlogData; error?: undefined }
+    | { success: false; error: string; data?: undefined }
   > => {
-    const blog = db.blog[slug];
-    const blogBodyUrl = new URL(
-      blog.bodyLink ?? "/db/blog-articles/" + slug + ".md",
+    console.log("NE", process.env.NEXT_PUBLIC_SITE_URL);
+    const getURL = new URL(
+      `/api/get/${type}/${slug}`,
       process.env.NEXT_PUBLIC_SITE_URL
     );
     try {
-      const res = await fetch(blogBodyUrl);
-      const body = await res.text();
-      if (body) {
-        console.log("bpyddda####", body);
-        blog.body = body;
-      }
+      const res = await fetch(getURL, {
+        method: "GET",
+      });
+      const body = await res.json();
+      console.log(body);
+      return body;
     } catch (e) {
-      logger(e, "ERROR");
+      logger(e);
+      console.log(e);
+      return { success: false, error: "unknown" };
     }
-    console.log("bpyddda####", blog);
-
-    if (!BlogApi.isViewable(blog))
-      return { status: "failed", error: "Blog not viewable" };
-    if (!blog) return { status: "failed", error: "Blog not found" };
-    return { status: "success", blog };
   },
   // V2
   isViewable: (blog: BlogData): boolean => {
@@ -49,27 +46,39 @@ export const BlogApi = {
     ) {
       return false;
     }
-    if (!blog?.date?.arrival) {
+    if (!blog?.arrival) {
       return false;
     }
     return true;
   },
 
   update: async (
-    slug: string,
-    newBody: string
+    data: Partial<BlogData> & BlogKeyComponents
   ): Promise<{ success: boolean } & any> => {
     console.log("NE", process.env.NEXT_PUBLIC_SITE_URL);
     const updateUrl = new URL("/api/update", process.env.NEXT_PUBLIC_SITE_URL);
     try {
       const res = await fetch(updateUrl, {
         method: "PUT",
-        body: JSON.stringify({
-          blog: {
-            slug: slug,
-            body: newBody,
-          },
-        }),
+        body: JSON.stringify(data),
+      });
+      const body = await res.json();
+      console.log(body);
+      return body;
+    } catch (e) {
+      logger(e);
+      console.log(e);
+      return { success: false, error: "unknown" };
+    }
+  },
+
+  create: async (data: BlogData): Promise<{ success: boolean } & any> => {
+    console.log("NE", process.env.NEXT_PUBLIC_SITE_URL);
+    const createUrl = new URL("/api/create", process.env.NEXT_PUBLIC_SITE_URL);
+    try {
+      const res = await fetch(createUrl, {
+        method: "POST",
+        body: JSON.stringify(data),
       });
       const body = await res.json();
       console.log(body);

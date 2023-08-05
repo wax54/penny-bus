@@ -4,6 +4,7 @@ import {
   APIGatewayProxyResult,
 } from "aws-lambda";
 import AWS from "aws-sdk";
+import { BlogData } from "./types";
 
 // import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
@@ -16,14 +17,14 @@ import AWS from "aws-sdk";
 export type UpdateBlogInput = {
   blog: {
     slug: string;
-    body?: string;
-  };
+  } & Partial<BlogData>;
 };
 
 const getBody = (event: APIGatewayProxyEvent): UpdateBlogInput => {
   if (!event.body) throw Error("No body");
   try {
     const body = JSON.parse(event.body);
+
     return body;
   } catch (e) {
     throw Error("malformed body");
@@ -36,26 +37,17 @@ export const handler: Handler = async (
   try {
     console.log({ event });
     const body = getBody(event);
-    // console.log(body);
-
     const blogUpdates = body.blog;
-    const bucket = "prod-bus-website";
-    console.log(JSON.stringify({ blogUpdates, bucket }, null, 2));
-    const path = "db/blog-articles/" + blogUpdates.slug + ".md";
-    console.log(JSON.stringify({ path }, null, 2));
-
-    if (blogUpdates.body) {
-      const a = await putObjectToS3(bucket, path, blogUpdates.body);
-      console.log(a);
+    if (blogUpdates) {
+      console.log({ blogUpdates });
+      const a = await PutObjectToDynamo(blogUpdates);
+      console.log({ a });
     }
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        input: event,
-        path,
         blogUpdates,
-        bucket,
         body,
       }),
     };
@@ -67,6 +59,33 @@ export const handler: Handler = async (
     };
   }
 };
+
+const getTableName = (table: "BUS"): string => {
+  let tableName;
+  if (table === "BUS") {
+    tableName = process.env.BUS_TABLE_NAME;
+  }
+
+  if (!tableName) {
+    throw Error("No table name defined for table " + table);
+  }
+  return tableName;
+};
+async function PutObjectToDynamo(Item: Partial<BlogData>) {
+  var DynamoDB = new AWS.DynamoDB.DocumentClient();
+  var params = {
+    TableName: getTableName("BUS"),
+    Item,
+  };
+  // const a = await s3.putObject(params);
+  return await new Promise((res, rej) => {
+    DynamoDB.put(params, function (err: Error, data: any) {
+      console.log({ err, stack: err?.stack, data });
+      if (err) rej(err);
+      else res(data);
+    });
+  });
+}
 
 async function putObjectToS3(bucket: string, key: string, data: string) {
   var s3 = new AWS.S3();
