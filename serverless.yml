@@ -7,8 +7,6 @@ provider:
   profile: home
   versionFunctions: false
   logRetentionInDays: 30
-  environment:
-    BUS_TABLE: !ImportValue ${self:custom.sstApp}-ExtPennyTableName-${self:custom.stage}
 custom:
   stage: ${opt:stage, self:provider.stage}
   domains:
