@@ -17,6 +17,7 @@ custom:
   deletionPolicies: #dynamoDB deletion policy
     dev: Retain
     prod: Retain
+  deletionPolicy: ${self:custom.deletionPolicies.${self:custom.stage}, 'Delete'}
   esbuild:
     bundle: true
     minify: true
@@ -73,7 +74,7 @@ resources:
           - AttributeName: PK
             KeyType: HASH
           - AttributeName: SK
-            KeyType: RANGE 
+            KeyType: RANGE
         AttributeDefinitions:
           - AttributeName: PK
             AttributeType: S
@@ -409,6 +410,6 @@ resources:
                 - Effect: "Allow"
                   Action:
                     - s3:PutObject
-                  Resource: 
+                  Resource:
                     - arn:aws:s3:::${self:custom.staticAssetBucket}/db/*
                     - arn:aws:s3:::${self:custom.staticAssetBucket}/db/
