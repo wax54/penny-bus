@@ -2,6 +2,7 @@ import { InferGetStaticPropsType } from "next";
 import * as publicBlogPage from "../../blog/index";
 import { useState } from "react";
 import { BlogApi } from "../../../api";
+import { NEW_BLOG_SLUG } from "../../../constants/config";
 export const getStaticProps = publicBlogPage.getStaticProps;
 export const UpdateBlog = ({
   blogs,
@@ -22,9 +23,7 @@ export const UpdateBlog = ({
   };
   return (
     <div className="bg-offWhite">
-      <button onClick={() => setShowCreator((state) => !state)}>
-        New post
-      </button>
+      <a href={`./blog/${NEW_BLOG_SLUG}`}>New post</a>
       <div className={showCreator ? "" : "hidden"}>
         <input
           value={newSlug}

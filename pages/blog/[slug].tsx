@@ -11,6 +11,7 @@ import { BlogDate, BlogData } from "../../types";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
 import { BlogApi } from "../../api";
+import { NEW_BLOG_SLUG } from "../../constants/config";
 
 export function BlogPost({ blog }: { blog: BlogData }) {
   console.log(blog);
@@ -67,7 +68,9 @@ export function BlogPost({ blog }: { blog: BlogData }) {
         </div>
         {blog.body ? (
           <ReactMarkdown className="">
-            {blog.body ? blog.body.replace(/\n/gi, "\n &nbsp;  \n  ") : 'PRE RENDER'}
+            {blog.body
+              ? blog.body.replace(/\n/gi, "\n &nbsp;  \n  ")
+              : "PRE RENDER"}
           </ReactMarkdown>
         ) : null}
         <p
@@ -102,12 +105,14 @@ export async function getStaticPaths({}: GetStaticPathsContext): Promise<GetStat
     fallback: "blocking",
   };
 }
-export async function getStaticProps({
-  params,
-}: GetStaticPropsContext<{ slug: string }>): Promise<
+export async function getStaticProps(
+  { params }: GetStaticPropsContext<{ slug: string }>,
+  admin?: boolean
+): Promise<
   GetStaticPropsResult<{
-    blog: BlogData;
+    blog?: BlogData;
     slug: string;
+    admin?: boolean;
   }>
 > {
   if (!params)
@@ -115,6 +120,9 @@ export async function getStaticProps({
       redirect: { destination: "/", permanent: false },
     };
   const slug = params.slug;
+  if (admin && slug === NEW_BLOG_SLUG) {
+    return { props: { slug, admin } };
+  }
   const { status, blog, error } = await BlogApi.get(slug);
 
   if (status !== "success") {
