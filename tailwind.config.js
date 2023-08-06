@@ -33,8 +33,8 @@ module.exports = {
         },
       },
       animation: {
-        "fade-out": "fade-out 2s linear",
-        "fade-in": "fade-in 2s linear",
+        "fade-out": "fade-out 0.7s linear",
+        "fade-in": "fade-in 0.7s linear",
       },
     },
   },

@@ -17,7 +17,8 @@ export const Layout = (props: {
       bottom-0
       left-0
       right-0
-      bg-offWhite"
+      bg-offWhite
+      p-10"
       >
         <Header nav={props.nav} styles={page} />
         <div id="side-bar" style={page.sideBar} />

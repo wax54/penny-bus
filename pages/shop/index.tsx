@@ -17,7 +17,7 @@ const ImageSlideShow = (
         setIdx((currIdx) =>
           currIdx + 1 < props.urls.length ? currIdx + 1 : 0
         ),
-      6000
+      1500
     );
     return () => clearInterval(id);
   }, [props.urls.length]);
@@ -57,6 +57,7 @@ export default function Blog({
               <ImageSlideShow
                 urls={item.images}
                 className="max-w-screen sm:max-w-[50vw] sm:max-h-[50vh] m-auto "
+                alt={item.title}
               />
             </a>
           </div>
