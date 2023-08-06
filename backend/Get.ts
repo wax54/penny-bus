@@ -46,7 +46,7 @@ export const handler: Handler = async (
     console.log(e);
     return {
       statusCode: 400,
-      body: JSON.stringify({ success: false, e, error: e.messages }),
+      body: JSON.stringify({ success: false, e, error: e.message }),
     };
   }
 };

@@ -13,7 +13,12 @@ custom:
     prod: pennybusproject.com
     dev: dev.pennybusproject.com
   domain: ${self:custom.domains.${self:custom.stage}, '${self:custom.stage}.pennybusproject.com'}
+  environments:
+    dev: dev
+    prod: prod
+  environment: ${self:custom.environments.${self:custom.stage}, self:custom.environments.dev}
   staticAssetBucket: ${self:custom.stage}-${self:service}
+  backendApi: !ImportValue ExtPennyBackendAPI-${self:custom.environment}
   esbuild:
     bundle: true
     minify: true
@@ -74,19 +79,19 @@ resources:
           BlockPublicPolicy: false
           RestrictPublicBuckets: false
 
-    # BucketPolicyStaticAsset:
-    #   Type: "AWS::S3::BucketPolicy"
-    #   Properties:
-    #     PolicyDocument:
-    #       Statement:
-    #         - Sid: PublicReadForGetBucketObjects
-    #           Effect: Allow
-    #           Principal: "*"
-    #           Action:
-    #             - "s3:GetObject"
-    #           Resource: arn:aws:s3:::${self:custom.staticAssetBucket}/*
-    #     Bucket:
-    #       Ref: StaticAssetBucket
+    BucketPolicyStaticAsset:
+      Type: "AWS::S3::BucketPolicy"
+      Properties:
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: "*"
+              Action:
+                - "s3:GetObject"
+              Resource: arn:aws:s3:::${self:custom.staticAssetBucket}/*
+        Bucket:
+          Ref: StaticAssetBucket
     # PolicyDocument:
     #   Statement:
     #     - Action:
@@ -133,17 +138,13 @@ resources:
             - Id: api
               CustomOriginConfig:
                 OriginProtocolPolicy: https-only
-              DomainName:
-                {
-                  "Fn::Join":
-                    [
+              DomainName: { "Fn::Join": [
                       "",
                       [
-                        { "Ref": "ApiGatewayRestApi" },
+                        "${self:custom.backendApi}",
                         ".execute-api.${self:provider.region}.amazonaws.com",
                       ],
-                    ],
-                }
+                    ] }
               OriginPath: "/${self:custom.stage}"
             - Id: bucket
               DomainName: !GetAtt StaticAssetBucket.DomainName
@@ -204,7 +205,7 @@ resources:
           #     ResponsePagePath: /_error
           ViewerCertificate:
             # TODO: Update regular cert to include nested subdomains
-            AcmCertificateArn: ${ssm:/sam-the-dev/global/ca-cert-pennybusproject-arn}
+            AcmCertificateArn: ${ssm:/penny/bus-site/ca-cert-arn}
             SslSupportMethod: sni-only
 
     CloudFrontOriginAccessControl:
@@ -272,18 +273,19 @@ resources:
           HostedZoneId: Z2FDTNDATAQYW2 # Seemingly random id
           DNSName: !GetAtt CloudFront.DomainName
 
-    # AliasRecord:
-    #   Type: AWS::Route53::RecordSet
-    #   DependsOn:
-    #     - Record
-    #   Properties:
-    #     HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
-    #     Name: www.${self:custom.domain}
-    #     Type: A
-    #     # TTL: 300
-    #     AliasTarget:
-    #       HostedZoneId: Z2FDTNDATAQYW2 # Seemingly random id
-    #       DNSName: ${self.custom.domain}
+    AliasRecord:
+      Type: AWS::Route53::RecordSet
+      DependsOn:
+        - Record
+      Properties:
+        HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
+        Name: www.${self:custom.domain}
+        Type: A
+        # TTL: 300
+        AliasTarget:
+          HostedZoneId: Z08458952VAEWZUAGLB1P
+          DNSName: !Ref Record
+          # DNSName: ${self:custom.domain}
 
     BaseLambdaRole:
       Type: "AWS::IAM::Role"

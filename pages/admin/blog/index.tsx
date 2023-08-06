@@ -3,20 +3,26 @@ import * as publicBlogPage from "../../blog/index";
 import { useState } from "react";
 import { BlogApi } from "../../../api";
 import { NEW_BLOG_SLUG } from "../../../constants/config";
-export const getStaticProps = publicBlogPage.getStaticProps;
+export const getServerSideProps = publicBlogPage.getServerSideProps;
 export const UpdateBlog = ({
   blogs,
-}: InferGetStaticPropsType<typeof getStaticProps>) => {
+}: InferGetStaticPropsType<typeof getServerSideProps>) => {
   return (
     <div className="bg-offWhite">
       <a href={`./blog/${NEW_BLOG_SLUG}`}>New post</a>
-      {blogs.map(({ key, blog }) => {
-        return (
-          <a className="block my-5 px-2" href={`./blog/` + key} key={key}>
-            t: {blog.title} k: {key}
-          </a>
-        );
-      })}
+      {blogs
+        ? blogs.map((blog) => {
+            return (
+              <a
+                className="block my-5 px-2"
+                href={`./blog/` + blog.slug}
+                key={blog.slug}
+              >
+                t: {blog.title} k: {blog.slug}
+              </a>
+            );
+          })
+        : "NO BLOGS"}
     </div>
   );
 };

@@ -1,10 +1,12 @@
 import {
   BlogDBData,
+  BusTableDBItem,
   BusTableItem,
   BusTableKeyComponents,
   MinDBData,
 } from "../../types";
 import {
+  GetAllInPartitionFromDynamo,
   GetObjectFromDynamo,
   PutObjectToDynamo,
   UpdateObjectInDynamo,
@@ -31,12 +33,31 @@ const getTableName = (table: TableName): string => {
   return tableName;
 };
 
+const sanitize = (item: BusTableDBItem): BusTableItem => {
+  const newItem = { ...item, PK: undefined, SK: undefined };
+  delete newItem.PK;
+  delete newItem.SK;
+  return newItem;
+};
 export const busTable = {
-  get: async (key: BusTableKeyComponents) => {
-    return await GetObjectFromDynamo({
+  get: async (item: BusTableKeyComponents) => {
+    const { Item } = (await GetObjectFromDynamo({
       TableName: getTableName(TABLES.BUS),
-      Key: key,
-    });
+      Key: {
+        PK: item.type,
+        SK: item.slug,
+      } as MinDBData,
+    })) as { Item: BusTableDBItem | undefined };
+    return Item ? sanitize(Item) : undefined;
+  },
+  getAll: async (input: { type: PartitionName }) => {
+    const { Items } = (await GetAllInPartitionFromDynamo({
+      TableName: getTableName(TABLES.BUS),
+      Partition: input.type,
+    })) as { Items: BusTableDBItem[] | undefined };
+
+    Items?.forEach(sanitize);
+    return Items;
   },
   create: async (item: BusTableItem) => {
     return await PutObjectToDynamo({

@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "dist:create": "./create-dist.sh",
-    "deploy:prod": "npm run dist:create prod && cd .dist && npm run sls:deploy:prod && cd ../ && npm run sync:static:prod && npm run flush:prod",
-    "deploy:dev": "npm run dist:create dev && cd .dist && npm run sls:deploy:dev && cd ../ && npm run sync:static:dev && npm run flush:dev",
+    "deploy:prod": "npm run dist:create prod && npm run sync:static:prod && cd .dist && npm run sls:deploy:prod && cd ../ && npm run flush:prod",
+    "deploy:dev": "npm run dist:create dev && npm run sync:static:dev && cd .dist && npm run sls:deploy:dev && cd ../ && npm run flush:dev",
     "sls:deploy:prod": "sls deploy --stage prod --verbose",
     "sls:deploy:dev": "sls deploy --stage dev --verbose",
     "sync:static:prod": "aws s3 sync .next/static s3://prod-bus-website/_next/static/",
@@ -20,8 +20,8 @@
     "deploy:backend:dev": "cd backend && sls deploy --stage dev",
     "deploy:table:prod": "cd db && sls deploy --stage prod",
     "deploy:table:dev": "cd db && sls deploy --stage dev",
-    "flush:prod": "aws cloudfront create-invalidation --distribution-id EV003T103RYK --paths \"/*\"",
-    "flush:dev": "aws cloudfront create-invalidation --distribution-id  --paths \"/*\""
+    "flush:prod": "aws cloudfront create-invalidation --distribution-id ECRPR20932SE2 --paths \"/*\"",
+    "flush:dev": "aws cloudfront create-invalidation --distribution-id E3MVE0FQT5FY6M --paths \"/*\""
   },
   "dependencies": {
     "@types/node": "20.2.5",

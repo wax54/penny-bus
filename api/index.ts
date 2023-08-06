@@ -1,22 +1,44 @@
-import db from "../db";
+import { PartitionName } from "../backend/utils/busTable";
 import { logger } from "../logger";
 import { BlogData, BlogKeyComponents } from "../types";
 
 export const BlogApi = {
-  getAll: async () => {
-    return Object.keys(db.blog)
-      .filter((key) => BlogApi.isViewable(db.blog[key]))
-      .map((key) => ({
-        key: key,
-        blog: db.blog[key],
-      }));
+  getAll: async ({
+    type,
+  }: {
+    type: PartitionName;
+  }): Promise<
+    | {
+        success: true;
+        body: { items: BlogData[]; total: number };
+        error?: undefined;
+      }
+    | { success: false; error: string; body?: undefined }
+  > => {
+    console.log("NE", process.env.NEXT_PUBLIC_SITE_URL);
+    const getURL = new URL(
+      `/api/get/${type}`,
+      process.env.NEXT_PUBLIC_SITE_URL
+    );
+    try {
+      const res = await fetch(getURL, {
+        method: "GET",
+      });
+      const body = await res.json();
+      console.log(body);
+      return body;
+    } catch (e) {
+      logger(e);
+      console.log(e);
+      return { success: false, error: "unknown" };
+    }
   },
   get: async ({
     type,
     slug,
   }: BlogKeyComponents): Promise<
-    | { success: true; data: BlogData; error?: undefined }
-    | { success: false; error: string; data?: undefined }
+    | { success: true; body: BlogData; error?: undefined }
+    | { success: false; error: string; body?: undefined }
   > => {
     console.log("NE", process.env.NEXT_PUBLIC_SITE_URL);
     const getURL = new URL(

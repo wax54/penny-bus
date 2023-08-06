@@ -11,6 +11,7 @@ import { BlogApi } from "../../../api";
 import { BlogData, BlogKeyComponents } from "../../../types";
 import { PARTITIONS } from "../../../backend/utils/busTable";
 import { NEW_BLOG_SLUG } from "../../../constants/config";
+import { useRouter } from "next/router";
 
 // export const getStaticPaths = publicSingleBlogPage.getStaticPaths;
 export const getServerSideProps = (
@@ -23,6 +24,8 @@ export const UpdateBlog = ({
   blog,
   slug,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  console.log("blog", slug);
+  const router = useRouter();
   const blogRef = useRef(
     blog
       ? blog
@@ -41,37 +44,43 @@ export const UpdateBlog = ({
   );
   const [currBlog, setCurrBlog] = useState(blogRef.current);
   const [loading, setLoading] = useState(false);
-  const inSync = currBlog.body === blogRef.current.body;
+  const inSync = Object.entries(currBlog).every(
+    ([key, val]) =>
+      JSON.stringify(val) ===
+      JSON.stringify(blogRef.current[key as keyof typeof currBlog])
+  );
+  console.log({ inSync });
   const updateBlog = useCallback(
     (updatedBlog: BlogData & BlogKeyComponents) => {
-      console.log("UPDATING", updatedBlog);
       setLoading(true);
       const manipulation =
         slug === NEW_BLOG_SLUG ? BlogApi.create : BlogApi.update;
       manipulation({ ...updatedBlog })
-        .then((resp) => {
-          console.log(resp);
+        .then(() => {
           setLoading(false);
           blogRef.current = { ...blogRef.current, ...updatedBlog };
+          if (slug === NEW_BLOG_SLUG) {
+            router.push("./" + updatedBlog.slug);
+          }
         })
         .catch((e) => setLoading(false));
     },
-    [slug, setLoading]
+    [slug, setLoading, router]
   );
   return (
     <div className="bg-offWhite flex flex-column sm:flex-row">
       <div className="p-4 flex-1">
         <div className="h-[20px]">
           {loading ? (
-            <div className="bg-secondary">LOADING</div>
-          ) : inSync ? (
-            <div className="bg-accent">IN SYNC</div>
+            <div className="bg-secondary">Loading</div>
+          ) : inSync && slug !== NEW_BLOG_SLUG ? (
+            <div className="bg-accent">In sync</div>
           ) : (
             <button
               className="bg-primary "
               onClick={() => updateBlog(currBlog)}
             >
-              SYNC NOW
+              {slug === NEW_BLOG_SLUG ? "Create" : "Sync now"}
             </button>
           )}
         </div>
@@ -81,7 +90,7 @@ export const UpdateBlog = ({
           disabled={slug !== NEW_BLOG_SLUG}
           className="my-4 p-4 w-full"
           placeholder="Slug"
-          value={currBlog.title}
+          value={currBlog.slug}
           onChange={(evt) => {
             const { value, name } = evt.target;
             setCurrBlog((blog) => ({

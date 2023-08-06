@@ -61,6 +61,7 @@ export function BlogPost({ blog }: { blog: BlogData }) {
       </div>
     );
   }
+  if (!blog) return <div>LOADING</div>;
   return (
     <>
       <div className="bg-accent/30 text-white mt-[20px] p-10 rounded-ss-[100px]">
@@ -101,8 +102,8 @@ export default function Blog({
   );
 }
 export async function getStaticPaths({}: GetStaticPathsContext): Promise<GetStaticPathsResult> {
-  const blogs = await BlogApi.getAll();
-  const keys = blogs.map((blog) => ({ params: { slug: blog.key } }));
+  const blogs = await BlogApi.getAll({ type: PARTITIONS.BLOG });
+  const keys = blogs.body?.items.map((blog) => ({ params: { slug: blog.slug } })) ?? [];
   return {
     paths: keys,
     fallback: "blocking",
@@ -126,10 +127,13 @@ export async function getStaticProps(
   if (admin && slug === NEW_BLOG_SLUG) {
     return { props: { slug, admin } };
   }
-  const { success, data, error } = await BlogApi.get({
+  console.log(slug)
+  const { success, body, error } = await BlogApi.get({
     type: PARTITIONS.BLOG,
     slug,
   });
+  console.log({ body, error, success })
+
 
   if (!success) {
     const redirect = new URLSearchParams({
@@ -143,5 +147,5 @@ export async function getStaticProps(
       },
     };
   }
-  return { props: { blog: data, slug } };
+  return { props: { blog: body, slug } };
 }

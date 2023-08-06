@@ -49,6 +49,14 @@ functions:
           method: GET
           path: api/get/{type}/{slug}
           cors: true
+  GetAll:
+    handler: ./GetAll.handler
+    role: PutDBLambdaRole
+    events:
+      - http:
+          method: GET
+          path: api/get/{type}
+          cors: true
   Update:
     handler: ./Update.handler
     role: PutDBLambdaRole
@@ -90,14 +98,17 @@ resources:
               Statement:
                 - Effect: "Allow"
                   Action:
-                    # - "dynamodb:GetItem"
-                    # - "dynamodb:BatchGetItem"
-                    # - "dynamodb:Query"
-                    # - "dynamodb:Scan"
-                    # - "dynamodb:BatchWriteItem"
+                    - "dynamodb:GetItem"
+                    - "dynamodb:Query"
                     - "dynamodb:PutItem"
                     - "dynamodb:UpdateItem"
                   Resource:
                     "*"
                     # - arn:aws:s3:::${self:custom.staticAssetBucket}/db/*
                     # - arn:aws:s3:::${self:custom.staticAssetBucket}/db/
+  Outputs:
+    PennyBackendAPI:
+      Value:
+        Ref: ApiGatewayRestApi
+      Export:
+        Name: ExtPennyBackendAPI-${self:custom.stage}
