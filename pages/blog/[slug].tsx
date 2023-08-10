@@ -12,7 +12,7 @@ import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
 import { BlogApi } from "../../api";
 import { NEW_BLOG_SLUG } from "../../constants/config";
-import { PARTITIONS } from "../../backend/utils/busTable";
+import { PARTITIONS } from "../../bus-backend/utils/busTable";
 
 export function BlogPost({ blog }: { blog: BlogData }) {
   console.log(blog);

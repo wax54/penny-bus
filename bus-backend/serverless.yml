@@ -8,13 +8,15 @@ provider:
   versionFunctions: false
   logRetentionInDays: 30
   environment:
-    BUS_TABLE: !ImportValue ExtPennyTableName-${self:custom.environment}
+    BUS_TABLE: ${self:custom.busTableName}
 custom:
   stage: ${opt:stage, self:provider.stage}
   environments:
     dev: dev
     prod: prod
   environment: ${self:custom.environments.${self:custom.stage}, self:custom.environments.dev}
+  busTableName: !ImportValue ExtPennyTableName-${self:custom.environment}
+  busTableARN: !ImportValue ExtPennyTableARN-${self:custom.environment}
   esbuild:
     bundle: true
     minify: true
@@ -23,11 +25,11 @@ custom:
     external:
       - next
 
-package:
-  patterns:
-    - "!./**"
-    - "node_modules"
-    - "package.json"
+# package:
+#   patterns:
+#     - "!./**"
+#     - "node_modules"
+#     - "package.json"
 
 plugins:
   - serverless-esbuild
@@ -35,7 +37,7 @@ plugins:
 functions:
   Create:
     handler: ./Create.handler
-    role: DBLambdaRole
+    role: BusTableLambdaRole
     events:
       - http:
           method: POST
@@ -43,7 +45,7 @@ functions:
           cors: true
   Get:
     handler: ./Get.handler
-    role: DBLambdaRole
+    role: BusTableLambdaRole
     events:
       - http:
           method: GET
@@ -51,7 +53,7 @@ functions:
           cors: true
   GetAll:
     handler: ./GetAll.handler
-    role: DBLambdaRole
+    role: BusTableLambdaRole
     events:
       - http:
           method: GET
@@ -59,15 +61,15 @@ functions:
           cors: true
   Update:
     handler: ./Update.handler
-    role: DBLambdaRole
+    role: BusTableLambdaRole
     events:
       - http:
           method: PUT
-          path: api/update
+          path: api/{type}/{slug}
           cors: true
   Delete:
     handler: ./Delete.handler
-    role: DBLambdaRole
+    role: BusTableLambdaRole
     events:
       - http:
           method: DELETE
@@ -76,10 +78,10 @@ functions:
 
 resources:
   Resources:
-    DBLambdaRole:
+    BusTableLambdaRole:
       Type: "AWS::IAM::Role"
       Properties:
-        RoleName: DBLambdaRole-${self:custom.stage}
+        RoleName: BusTableLambdaRole-${self:custom.stage}
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -110,10 +112,9 @@ resources:
                     - "dynamodb:Query"
                     - "dynamodb:PutItem"
                     - "dynamodb:UpdateItem"
+                    - "dynamodb:DeleteItem"
                   Resource:
-                    "*"
-                    # - arn:aws:s3:::${self:custom.staticAssetBucket}/db/*
-                    # - arn:aws:s3:::${self:custom.staticAssetBucket}/db/
+                    ${self:custom.busTableARN}
   Outputs:
     PennyBackendAPI:
       Value:

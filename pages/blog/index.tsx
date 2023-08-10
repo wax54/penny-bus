@@ -4,7 +4,7 @@ import { nav } from "../../constants/nav";
 import { useState } from "react";
 import { BlogData } from "../../types";
 import { BlogApi } from "../../api";
-import { PARTITIONS } from "../../backend/utils/busTable";
+import { PARTITIONS } from "../../bus-backend/utils/busTable";
 import { NEW_BLOG_SLUG } from "../../constants/config";
 const sortByDate = (a: BlogData, b: BlogData) =>
   new Date(a.arrival).getTime() - new Date(b.arrival).getTime();
@@ -37,6 +37,7 @@ export default function Blog({
       return next < sortOptions.length ? sortOptions[next] : sortOptions[0];
     });
   };
+
   return (
     <Layout nav={nav} admin={admin}>
       <h2
@@ -81,11 +82,6 @@ export default function Blog({
                       {new Date(blog.arrival).toDateString()}
                     </span>
                   </a>
-                  {admin ? (
-                    <span className=" flex-0 bg-primary hover:bg-secondary p-3 rounded-xl">
-                      DELETE!
-                    </span>
-                  ) : null}
                 </li>
               ))
           : "NO BLOGS"}

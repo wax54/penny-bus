@@ -9,7 +9,7 @@ import * as publicSingleBlogPage from "../../blog/[slug]";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BlogApi } from "../../../api";
 import { BlogData, BlogKeyComponents } from "../../../types";
-import { PARTITIONS } from "../../../backend/utils/busTable";
+import { PARTITIONS } from "../../../bus-backend/utils/busTable";
 import { NEW_BLOG_SLUG } from "../../../constants/config";
 import { useRouter } from "next/router";
 
@@ -63,10 +63,25 @@ export const UpdateBlog = ({
             router.push("./" + updatedBlog.slug);
           }
         })
-        .catch((e) => setLoading(false));
+        .catch((e) => {
+          setLoading(false);
+        });
     },
     [slug, setLoading, router]
   );
+
+  const deleteBlog = useCallback(() => {
+    setLoading(true);
+    const manipulation = BlogApi.delete;
+    manipulation({ type: currBlog.type, slug: currBlog.slug })
+      .then((res) => {
+        setLoading(false);
+        console.log("DONE", res);
+
+        // router.push("../");
+      })
+      .catch((e) => setLoading(false));
+  }, [slug, setLoading, router]);
   return (
     <div className="bg-offWhite flex flex-column sm:flex-row">
       <div className="p-4 flex-1">
@@ -191,21 +206,30 @@ export const UpdateBlog = ({
           <option value="Zoë Williams">Z-Word</option>
           <option value="Sam Crewe-Sullam">SAMMA</option>
         </select>
+        <div>
+          <input
+            id="isHidden"
+            type="checkbox"
+            name="isHidden"
+            className="my-4 p-4 w-full"
+            checked={currBlog.isHidden ? true : false}
+            onChange={(evt) => {
+              const { checked, name } = evt.target;
+              console.log({ checked });
+              setCurrBlog((blog) => ({ ...blog, [name]: checked }));
+            }}
+          />
+          <label htmlFor="isHidden">Is hidden</label>
+        </div>
 
-        <input
-          id="isHidden"
-          type="checkbox"
-          name="isHidden"
-          className="my-4 p-4 w-full"
-          checked={currBlog.isHidden ? true : false}
-          onChange={(evt) => {
-            const { checked, name } = evt.target;
-            console.log({ checked });
-            setCurrBlog((blog) => ({ ...blog, [name]: checked }));
-          }}
-        />
-        <label htmlFor="isHidden">Is hidden</label>
+        <button
+          className="bg-secondary hover:bg-primary p-2 rounded my-4"
+          onClick={deleteBlog}
+        >
+          DELETE
+        </button>
       </div>
+
       <div className="flex-1">
         <publicSingleBlogPage.BlogPost blog={currBlog} />
       </div>

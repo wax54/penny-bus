@@ -1,4 +1,4 @@
-import { PARTITIONS, PartitionName } from "../backend/utils/busTable";
+import { PARTITIONS, PartitionName } from "../bus-backend/utils/busTable";
 
 export type MinDBData = {
   PK: PartitionName;

@@ -4,8 +4,8 @@ import {
   APIGatewayProxyResult,
 } from "aws-lambda";
 import AWS from "aws-sdk";
-import { BlogData, BusTableItem } from "../types";
-import { PartitionName, busTable } from "./utils/busTable";
+import { BlogData, BusTableItem, BusTableKeyComponents } from "../types";
+import { PARTITIONS, PartitionName, busTable } from "./utils/busTable";
 
 // import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
@@ -21,13 +21,20 @@ export type UpdateBlogInput = {
 } & Partial<BusTableItem>;
 
 const getBody = (event: APIGatewayProxyEvent): UpdateBlogInput => {
+  if (!event.pathParameters) throw Error("No type or slug specified in path");
   if (!event.body) throw Error("No body");
   try {
-    const body = JSON.parse(event.body);
-    if (!body.type || !body.slug) {
-      throw Error('Type or slug not defined!')
+    const body = JSON.parse(event.body) as Omit<BusTableItem, "type" | "slug"> &
+      Partial<Pick<BusTableItem, "type" | "slug">>;
+    const { type, slug } = event.pathParameters as BusTableKeyComponents;
+
+    if (!type || !slug) {
+      throw Error("Type or slug not defined!");
     }
-    return body;
+    if (!Object.values(PARTITIONS).includes(type)) {
+      throw Error("Invalid type " + type);
+    }
+    return { ...body, type, slug };
   } catch (e) {
     throw Error("malformed body");
   }

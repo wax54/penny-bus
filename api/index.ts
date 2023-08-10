@@ -1,4 +1,4 @@
-import { PartitionName } from "../backend/utils/busTable";
+import { PartitionName } from "../bus-backend/utils/busTable";
 import { logger } from "../logger";
 import { BlogData, BlogKeyComponents } from "../types";
 
