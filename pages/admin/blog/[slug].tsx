@@ -12,6 +12,7 @@ import { BlogData, BlogKeyComponents } from "../../../types";
 import { PARTITIONS } from "../../../bus-backend/utils/busTable";
 import { NEW_BLOG_SLUG } from "../../../constants/config";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 // export const getStaticPaths = publicSingleBlogPage.getStaticPaths;
 export const getServerSideProps = (
@@ -77,13 +78,13 @@ export const UpdateBlog = ({
       .then((res) => {
         setLoading(false);
         console.log("DONE", res);
-
-        // router.push("../");
+        setTimeout(() => router.push("/admin/blog"), 200);
       })
       .catch((e) => setLoading(false));
   }, [slug, setLoading, router]);
   return (
     <div className="bg-offWhite flex flex-column sm:flex-row">
+      <Link href="/admin/blog">Blog list</Link>
       <div className="p-4 flex-1">
         <div className="h-[20px]">
           {loading ? (
@@ -102,7 +103,7 @@ export const UpdateBlog = ({
 
         <input
           name="slug"
-          disabled={slug !== NEW_BLOG_SLUG}
+          disabled={slug !== NEW_BLOG_SLUG || loading}
           className="my-4 p-4 w-full"
           placeholder="Slug"
           value={currBlog.slug}
@@ -118,6 +119,7 @@ export const UpdateBlog = ({
         <input
           name="title"
           className="my-4 p-4 w-full"
+          disabled={loading}
           placeholder="Title"
           value={currBlog.title}
           onChange={(evt) => {
@@ -128,6 +130,7 @@ export const UpdateBlog = ({
 
         <input
           name="subtitle"
+          disabled={loading}
           className="my-4 p-4 w-full"
           placeholder="Subtitle"
           value={currBlog.subtitle}
@@ -140,6 +143,7 @@ export const UpdateBlog = ({
         <input
           name="fee"
           className="my-4 p-4 w-full"
+          disabled={loading}
           placeholder="Fee"
           value={currBlog.fee}
           type="number"
@@ -152,6 +156,7 @@ export const UpdateBlog = ({
           <input
             name="arrival"
             type="datetime-local"
+            disabled={loading}
             placeholder="Arrival"
             className="my-4 p-4 w-full"
             value={currBlog.arrival}
@@ -166,6 +171,7 @@ export const UpdateBlog = ({
           <input
             name="departure"
             type="datetime-local"
+            disabled={loading}
             placeholder="Departure"
             className="my-4 p-4 w-full"
             value={currBlog.departure}
@@ -181,6 +187,7 @@ export const UpdateBlog = ({
         <textarea
           name="body"
           className=" my-4 p-4 w-full h-[600px]"
+          disabled={loading}
           placeholder="Body"
           value={currBlog.body}
           onChange={(evt) => {
@@ -193,6 +200,7 @@ export const UpdateBlog = ({
           name="author"
           className="my-4 p-4 w-full"
           placeholder="Author"
+          disabled={loading}
           value={currBlog.author}
           onChange={(evt) => {
             const { value, name } = evt.target;
@@ -212,6 +220,7 @@ export const UpdateBlog = ({
             type="checkbox"
             name="isHidden"
             className="my-4 p-4 w-full"
+            disabled={loading}
             checked={currBlog.isHidden ? true : false}
             onChange={(evt) => {
               const { checked, name } = evt.target;
@@ -221,13 +230,14 @@ export const UpdateBlog = ({
           />
           <label htmlFor="isHidden">Is hidden</label>
         </div>
-
-        <button
-          className="bg-secondary hover:bg-primary p-2 rounded my-4"
-          onClick={deleteBlog}
-        >
-          DELETE
-        </button>
+        {slug === NEW_BLOG_SLUG ? (
+          <button
+            className="bg-secondary hover:bg-primary p-2 rounded my-4"
+            onClick={deleteBlog}
+          >
+            DELETE
+          </button>
+        ) : null}
       </div>
 
       <div className="flex-1">
