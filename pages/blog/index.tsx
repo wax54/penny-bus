@@ -65,10 +65,10 @@ export default function Blog({
           ? blogs
               .sort((a, b) => sort.sortFunc(a, b))
               .map((blog) => (
-                <li key={blog.slug} style={{ margin: "auto" }}>
+                <li key={blog.slug} style={{ margin: "auto" }} className="flex">
                   <a
                     href={`./blog/${blog.slug}`}
-                    className="rounded-xl decoration-none bg-primary text-text-primary border-b-[2px] border-transparent hover:border-white hover:bg-secondary   hover:text-textSecondary cursor-pointer flex justify-between"
+                    className="flex-1 rounded-xl decoration-none bg-primary text-text-primary border-b-[2px] border-transparent hover:border-white hover:bg-secondary   hover:text-textSecondary cursor-pointer flex justify-between"
                     style={{
                       textTransform: "capitalize",
                       padding: 10,
@@ -81,6 +81,11 @@ export default function Blog({
                       {new Date(blog.arrival).toDateString()}
                     </span>
                   </a>
+                  {admin ? (
+                    <span className=" flex-0 bg-primary hover:bg-secondary p-3 rounded-xl">
+                      DELETE!
+                    </span>
+                  ) : null}
                 </li>
               ))
           : "NO BLOGS"}
