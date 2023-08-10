@@ -40,10 +40,9 @@ export async function GetAllInPartitionFromDynamo(params: {
     );
   });
 }
-export async function PutObjectToDynamo(params: {
-  TableName: string;
-  Item: { [key: string]: any };
-}): Promise<DynamoDBType.DocumentClient.PutItemOutput> {
+export async function PutObjectToDynamo(
+  params: DynamoDBType.DocumentClient.PutItemInput
+): Promise<DynamoDBType.DocumentClient.PutItemOutput> {
   return await new Promise((res, rej) => {
     DynamoDB.put(params, function (err: Error, data: any) {
       console.log({ err, stack: err?.stack, data });
@@ -60,6 +59,18 @@ export async function UpdateObjectInDynamo(params: {
 }): Promise<DynamoDBType.DocumentClient.UpdateItemOutput> {
   return await new Promise((res, rej) => {
     DynamoDB.update(params, function (err: Error, data: any) {
+      console.log({ err, stack: err?.stack, data });
+      if (err) rej(err);
+      else res(data);
+    });
+  });
+}
+
+export async function DeleteObjectFromDynamo(
+  params: DynamoDBType.DocumentClient.DeleteItemInput
+): Promise<DynamoDBType.DocumentClient.DeleteItemOutput> {
+  return await new Promise((res, rej) => {
+    DynamoDB.delete(params, function (err: Error, data: any) {
       console.log({ err, stack: err?.stack, data });
       if (err) rej(err);
       else res(data);

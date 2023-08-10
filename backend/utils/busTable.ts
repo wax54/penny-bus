@@ -6,6 +6,7 @@ import {
   MinDBData,
 } from "../../types";
 import {
+  DeleteObjectFromDynamo,
   GetAllInPartitionFromDynamo,
   GetObjectFromDynamo,
   PutObjectToDynamo,
@@ -59,16 +60,29 @@ export const busTable = {
     Items?.forEach(sanitize);
     return Items;
   },
-  create: async (item: BusTableItem) => {
+  create: async (item: BusTableItem, options?: { forceCreate?: boolean }) => {
     return await PutObjectToDynamo({
       TableName: getTableName(TABLES.BUS),
       Item: { ...item, PK: item.type, SK: item.slug } as BlogDBData,
+
+      ConditionExpression: options?.forceCreate
+        ? undefined
+        : "attribute_not_exists(PK)",
     });
   },
   update: async (item: Partial<BusTableItem> & BusTableKeyComponents) => {
     return await UpdateObjectInDynamo({
       TableName: getTableName(TABLES.BUS),
       Item: item,
+      Key: {
+        PK: item.type,
+        SK: item.slug,
+      } as MinDBData,
+    });
+  },
+  delete: async (item: BusTableKeyComponents) => {
+    return await DeleteObjectFromDynamo({
+      TableName: getTableName(TABLES.BUS),
       Key: {
         PK: item.type,
         SK: item.slug,

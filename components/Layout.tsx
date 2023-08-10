@@ -3,8 +3,9 @@ import { StylesType, styles } from "../constants/styles";
 import { Header } from "./Header";
 
 export const Layout = (props: {
-  children: JSX.Element | JSX.Element[] | undefined;
+  children: JSX.Element | undefined | null | (JSX.Element | null | undefined)[];
   nav: NavItem[];
+  admin?: boolean;
   style?: StylesType;
 }) => {
   const page = props.style?.page ?? styles.page;
@@ -20,7 +21,7 @@ export const Layout = (props: {
       bg-offWhite
       p-10"
       >
-        <Header nav={props.nav} styles={page} />
+        <Header nav={props.nav} styles={page} admin={props.admin} />
         <div id="side-bar" style={page.sideBar} />
         {props.children}
       </div>

@@ -24,21 +24,9 @@ export type BlogData = BlogKeyComponents & {
   author: string;
   fee?: number;
   bodyLink?: string;
-  isHidden?: boolean | { reason?: string; releaseDate?: string };
-} & ({ body: string } | { bodyLink: string });
-
-export type BlogDBData = BlogKey &
-  BlogKeyComponents & {
-    title: string;
-    subtitle?: string;
-    arrival: string;
-    departure: string;
-    body?: string;
-    author: string;
-    fee?: number;
-    bodyLink?: string;
-    isHidden?: boolean | { reason?: string; releaseDate?: string };
-  } & ({ body: string } | { bodyLink: string });
+  isHidden?: boolean;
+};
+export type BlogDBData = BlogKey & BlogData;
 
 export type BusTableItem = BlogData;
 export type BusTableKeyComponents = BlogKeyComponents;

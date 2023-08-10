@@ -15,44 +15,31 @@ import { PARTITIONS, PartitionName, busTable } from "./utils/busTable";
  */
 // const s3Client = new S3Client({ region: 'us-east-1' });
 
-export type CreateBlogInput = BusTableItem;
+export type DeleteInput = BusTableKeyComponents;
 
-const getBody = (event: APIGatewayProxyEvent): CreateBlogInput => {
-  if (!event.pathParameters) throw Error("No type or slug specified in path");
-  if (!event.body) throw Error("No body");
-  try {
-    const body = JSON.parse(event.body) as Omit<BusTableItem, "type" | "slug"> &
-      Partial<Pick<BusTableItem, "type" | "slug">>;
-    const { type, slug } = event.pathParameters as BusTableKeyComponents;
-
-    if (!type || !slug) {
-      throw Error("Type or slug not defined!");
-    }
-    if (!Object.values(PARTITIONS).includes(type)) {
-      throw Error("Invalid type " + type);
-    }
-    return { ...body, type, slug };
-  } catch (e) {
-    throw Error("malformed body");
+const getBody = (event: APIGatewayProxyEvent): DeleteInput => {
+  if (!event.pathParameters) throw Error("No slug or type in path");
+  const { type, slug } = event.pathParameters as DeleteInput;
+  if (!type || !slug) {
+    throw Error("Type or slug not defined!");
   }
+  if (!Object.values(PARTITIONS).includes(type)) {
+    throw Error("Invalid type " + type);
+  }
+  return { type, slug };
 };
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    console.log({ event });
     const body = getBody(event);
-    if (body) {
-      console.log({ body });
-      const a = await busTable.create(body);
-      console.log({ a });
-    }
+    const response = await busTable.delete(body);
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        body,
+        body: response,
       }),
     };
   } catch (e: any) {

@@ -35,43 +35,51 @@ plugins:
 functions:
   Create:
     handler: ./Create.handler
-    role: PutDBLambdaRole
+    role: DBLambdaRole
     events:
       - http:
           method: POST
-          path: api/create
+          path: api/{type}/{slug}
           cors: true
   Get:
     handler: ./Get.handler
-    role: PutDBLambdaRole
+    role: DBLambdaRole
     events:
       - http:
           method: GET
-          path: api/get/{type}/{slug}
+          path: api/{type}/{slug}
           cors: true
   GetAll:
     handler: ./GetAll.handler
-    role: PutDBLambdaRole
+    role: DBLambdaRole
     events:
       - http:
           method: GET
-          path: api/get/{type}
+          path: api/{type}
           cors: true
   Update:
     handler: ./Update.handler
-    role: PutDBLambdaRole
+    role: DBLambdaRole
     events:
       - http:
           method: PUT
           path: api/update
           cors: true
+  Delete:
+    handler: ./Delete.handler
+    role: DBLambdaRole
+    events:
+      - http:
+          method: DELETE
+          path: api/{type}/{slug}
+          cors: true
 
 resources:
   Resources:
-    PutDBLambdaRole:
+    DBLambdaRole:
       Type: "AWS::IAM::Role"
       Properties:
-        RoleName: PutDBLambdaRole-${self:custom.stage}
+        RoleName: DBLambdaRole-${self:custom.stage}
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
           Statement:
