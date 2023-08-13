@@ -1,6 +1,6 @@
 import { PARTITIONS, PartitionName } from "../bus-backend/utils/busTable";
 
-export type MinDBData = {
+export type MinBusDBData = {
   PK: PartitionName;
   SK: string;
 };
@@ -30,4 +30,4 @@ export type BlogDBData = BlogKey & BlogData;
 
 export type BusTableItem = BlogData;
 export type BusTableKeyComponents = BlogKeyComponents;
-export type BusTableDBItem = MinDBData & BlogDBData;
+export type BusTableDBItem = MinBusDBData & BlogDBData;

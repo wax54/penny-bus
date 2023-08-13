@@ -32,9 +32,9 @@ resources:
             AttributeType: S
           - AttributeName: SK
             AttributeType: S
-          - AttributeName: GSI1-PK
+          - AttributeName: GSI1PK
             AttributeType: S
-          - AttributeName: GSI1-SK
+          - AttributeName: GSI1SK
             AttributeType: S
         ProvisionedThroughput:
           ReadCapacityUnits: 1
@@ -42,9 +42,9 @@ resources:
         GlobalSecondaryIndexes:
           - IndexName: GSI1
             KeySchema:
-              - AttributeName: GSI1-PK
+              - AttributeName: GSI1PK
                 KeyType: HASH
-              - AttributeName: GSI1-SK
+              - AttributeName: GSI1SK
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
@@ -74,6 +74,65 @@ resources:
     #     Name: /penny/${self:custom.stage}/dynamo/relationTable/streamArn
     #     Type: String
     #     Value: !GetAtt PennyTable.StreamArn
+
+
+    AuthTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.deletionPolicy}
+      Properties:
+        TableName: Auth-${self:custom.stage}
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        # StreamSpecification:
+        #   StreamViewType: NEW_AND_OLD_IMAGES
+
+    AuthTableName:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /global/${self:custom.stage}/dynamo/AuthTable/name
+        Type: String
+        Value: !Ref AuthTable
+
+    AuthTableArn:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /global/${self:custom.stage}/dynamo/AuthTable/arn
+        Type: String
+        Value: !GetAtt AuthTable.Arn
+
+    # PennyTableStreamArn:
+    #   Type: AWS::SSM::Parameter
+    #   Properties:
+    #     Name: /penny/${self:custom.stage}/dynamo/relationTable/streamArn
+    #     Type: String
+    #     Value: !GetAtt PennyTable.StreamArn
   Outputs:
     PennyTableName:
       Value:
@@ -84,3 +143,12 @@ resources:
       Value: !GetAtt PennyTable.Arn
       Export:
         Name: ExtPennyTableARN-${self:custom.stage}
+    AuthTableName:
+      Value:
+        Ref: AuthTable
+      Export:
+        Name: ExtAuthTableName-${self:custom.stage}
+    AuthTableARN:
+      Value: !GetAtt AuthTable.Arn
+      Export:
+        Name: ExtAuthTableARN-${self:custom.stage}

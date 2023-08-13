@@ -3,7 +3,7 @@ import {
   BusTableDBItem,
   BusTableItem,
   BusTableKeyComponents,
-  MinDBData,
+  MinBusDBData,
 } from "../../types";
 import {
   DeleteObjectFromDynamo,
@@ -11,7 +11,7 @@ import {
   GetObjectFromDynamo,
   PutObjectToDynamo,
   UpdateObjectInDynamo,
-} from "./dynamo";
+} from "../../shared-utils/dynamo";
 
 export const TABLES = {
   BUS: "bus",
@@ -47,7 +47,7 @@ export const busTable = {
       Key: {
         PK: item.type,
         SK: item.slug,
-      } as MinDBData,
+      } as MinBusDBData,
     })) as { Item: BusTableDBItem | undefined };
     return Item ? sanitize(Item) : undefined;
   },
@@ -77,7 +77,7 @@ export const busTable = {
       Key: {
         PK: item.type,
         SK: item.slug,
-      } as MinDBData,
+      } as MinBusDBData,
     });
   },
   delete: async (item: BusTableKeyComponents) => {
@@ -86,7 +86,7 @@ export const busTable = {
       Key: {
         PK: item.type,
         SK: item.slug,
-      } as MinDBData,
+      } as MinBusDBData,
     });
   },
 };

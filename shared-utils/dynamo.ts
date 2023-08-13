@@ -1,6 +1,6 @@
 import AWS from "aws-sdk";
 import type DynamoDBType from "aws-sdk/clients/dynamodb";
-import { PARTITIONS } from "./busTable";
+import { PARTITIONS } from "../bus-backend/utils/busTable";
 var DynamoDB = new AWS.DynamoDB.DocumentClient();
 
 export async function GetObjectFromDynamo(params: {
@@ -16,6 +16,17 @@ export async function GetObjectFromDynamo(params: {
   });
 }
 
+export async function GetObjectsFromDynamoIndex(
+  params: DynamoDBType.DocumentClient.QueryInput
+): Promise<DynamoDBType.DocumentClient.QueryOutput> {
+  return await new Promise((res, rej) => {
+    DynamoDB.query(params, function (err: Error, data: any) {
+      console.log({ err, stack: err?.stack, data });
+      if (err) rej(err);
+      else res(data);
+    });
+  });
+}
 export async function GetAllInPartitionFromDynamo(params: {
   TableName: string;
   Partition: string;

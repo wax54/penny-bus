@@ -1,0 +1,163 @@
+service: auth-backend
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  profile: home
+  versionFunctions: false
+  logRetentionInDays: 30
+  environment:
+    AUTH_TABLE: ${self:custom.AuthTableName}
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  environments:
+    dev: dev
+    prod: prod
+  environment: ${self:custom.environments.${self:custom.stage}, self:custom.environments.dev}
+  AuthTableName: !ImportValue ExtAuthTableName-${self:custom.environment}
+  AuthTableARN: !ImportValue ExtAuthTableARN-${self:custom.environment}
+  esbuild:
+    bundle: true
+    minify: true
+    exclude:
+      - "*"
+    external:
+      - next
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+functions:
+  Create:
+    handler: ./Create.handler
+    role: CreateAuthTableLambdaRole
+    events:
+      - http:
+          method: POST
+          path: api/user/create
+
+  Login:
+    handler: ./Login.handler
+    role: ReadAuthTableLambdaRole
+    events:
+      - http:
+          method: POST
+          path: api/user/login
+
+  Refresh:
+    handler: ./Refresh.handler
+    role: AuthTableLambdaRole
+    events:
+      - http:
+          method: POST
+          path: api/user/refresh
+
+resources:
+  Resources:
+    CreateAuthTableLambdaRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: CreateAuthTableLambdaRole-${self:custom.stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - edgelambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: "LambdaRole-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - logs:*
+                  Resource: arn:aws:logs:*:*:*
+
+          - PolicyName: "CreateAuthDBPolicy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "dynamodb:GetItem"
+                    - "dynamodb:PutItem"
+                    - "dynamodb:UpdateItem"
+                  Resource: ${self:custom.AuthTableARN}
+
+    ReadAuthTableLambdaRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: ReadAuthTableLambdaRole-${self:custom.stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - edgelambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: "LambdaRole-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - logs:*
+                  Resource: arn:aws:logs:*:*:*
+
+          - PolicyName: "ReadAuthDBPolicy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "dynamodb:GetItem"
+                  Resource: ${self:custom.AuthTableARN}
+
+    DeleteAuthTableLambdaRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: DeleteAuthTableLambdaRole-${self:custom.stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - edgelambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: "LambdaRole-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - logs:*
+                  Resource: arn:aws:logs:*:*:*
+
+          - PolicyName: "DeleteAuthDBPolicy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "dynamodb:DeleteItem"
+                  Resource: ${self:custom.AuthTableARN}
+  Outputs:
+    PennyBackendAPI:
+      Value:
+        Ref: ApiGatewayRestApi
+      Export:
+        Name: ExtPennyBackendAPI-${self:custom.stage}
