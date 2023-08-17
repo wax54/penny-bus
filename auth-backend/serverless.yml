@@ -53,6 +53,14 @@ functions:
           method: POST
           path: api/user/refresh
 
+  Authenticate:
+    handler: ./Authenticate.handler
+    role: AuthTableLambdaRole
+    events:
+      - http:
+          method: POST
+          path: api/user/authenticate
+
 resources:
   Resources:
     CreateAuthTableLambdaRole:
