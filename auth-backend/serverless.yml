@@ -17,16 +17,16 @@ custom:
   environment: ${self:custom.environments.${self:custom.stage}, self:custom.environments.dev}
   AuthTableName: !ImportValue ExtAuthTableName-${self:custom.environment}
   AuthTableARN: !ImportValue ExtAuthTableARN-${self:custom.environment}
-  esbuild:
-    bundle: true
-    minify: true
-    exclude:
-      - "*"
-    external:
-      - next
+  # esbuild:
+  #   bundle: true
+  #   minify: true
+  #   exclude:
+  #     - "*"
+  #   external:
+  #     - next
 
 plugins:
-  - serverless-esbuild
+  # - serverless-esbuild
   - serverless-offline
 functions:
   Create:
@@ -47,7 +47,7 @@ functions:
 
   Refresh:
     handler: ./Refresh.handler
-    role: AuthTableLambdaRole
+    role: CreateAuthTableLambdaRole
     events:
       - http:
           method: POST
@@ -55,7 +55,7 @@ functions:
 
   Authenticate:
     handler: ./Authenticate.handler
-    role: AuthTableLambdaRole
+    role: ReadAuthTableLambdaRole
     events:
       - http:
           method: POST
@@ -164,8 +164,8 @@ resources:
                     - "dynamodb:DeleteItem"
                   Resource: ${self:custom.AuthTableARN}
   Outputs:
-    PennyBackendAPI:
+    PennyAuthAPI:
       Value:
         Ref: ApiGatewayRestApi
       Export:
-        Name: ExtPennyBackendAPI-${self:custom.stage}
+        Name: ExtPennyAuthAPI-${self:custom.stage}
