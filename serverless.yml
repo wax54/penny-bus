@@ -19,6 +19,7 @@ custom:
   environment: ${self:custom.environments.${self:custom.stage}, self:custom.environments.dev}
   staticAssetBucket: ${self:custom.stage}-${self:service}
   backendApi: !ImportValue ExtPennyBackendAPI-${self:custom.environment}
+  authApi: !ImportValue ExtPennyAuthAPI-${self:custom.environment}
   esbuild:
     bundle: true
     minify: true
@@ -151,6 +152,17 @@ resources:
               S3OriginConfig:
                 OriginAccessIdentity: ""
               OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+            - Id: auth
+              CustomOriginConfig:
+                OriginProtocolPolicy: https-only
+              DomainName: { "Fn::Join": [
+                      "",
+                      [
+                        "${self:custom.backendApi}",
+                        ".execute-api.${self:provider.region}.amazonaws.com",
+                      ],
+                    ] }
+              OriginPath: "/${self:custom.stage}"
           Aliases:
             - ${self:custom.domain}
             - www.${self:custom.domain}
@@ -196,6 +208,15 @@ resources:
                 QueryString: false
               ViewerProtocolPolicy: redirect-to-https
               PathPattern: /api/*
+            - AllowedMethods: [HEAD, DELETE, POST, GET, OPTIONS, PUT, PATCH]
+              TargetOriginId: auth
+              MinTTL: "0"
+              MaxTTL: "0"
+              DefaultTTL: "0"
+              ForwardedValues:
+                QueryString: false
+              ViewerProtocolPolicy: redirect-to-https
+              PathPattern: /auth/*
             - AllowedMethods: ["GET", "HEAD", "OPTIONS"]
               CachedMethods: ["HEAD", "GET"]
               TargetOriginId: bucket

@@ -26,7 +26,9 @@ export type PartitionName = (typeof PARTITIONS)[keyof typeof PARTITIONS];
 const getTableName = (table: TableName): string => {
   let tableName;
   if (table === TABLES.BUS) {
+    console.log("BUS")
     tableName = process.env.BUS_TABLE;
+    console.log(tableName)
   }
   if (!tableName) {
     throw Error("No table name defined for table " + table);

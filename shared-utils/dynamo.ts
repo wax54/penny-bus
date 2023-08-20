@@ -1,6 +1,5 @@
 import AWS from "aws-sdk";
 import type DynamoDBType from "aws-sdk/clients/dynamodb";
-import { PARTITIONS } from "../bus-backend/utils/busTable";
 var DynamoDB = new AWS.DynamoDB.DocumentClient();
 
 export async function GetObjectFromDynamo(params: {

@@ -5,12 +5,9 @@ import {
 } from "aws-lambda";
 import bcrypt from "bcrypt";
 
-import AWS from "aws-sdk";
-import { PARTITIONS, PartitionName, authTable } from "./utils/authTable";
+import { PARTITIONS, authTable } from "./utils/authTable";
 import { UserData } from "../types";
 import { randomUUID } from "crypto";
-import JWT from "jsonwebtoken";
-import { SECRET_JWT_HASH } from "./config";
 import { encodeUserToken } from "./utils/token";
 const SALT_ROUNDS = 15;
 
@@ -58,7 +55,7 @@ export const handler: Handler = async (
       createdAt: new Date().getTime(),
     });
 
-    console.log({ a });
+    console.log({ a, b });
     const token = encodeUserToken({ id, tokenHash });
     return {
       statusCode: 200,

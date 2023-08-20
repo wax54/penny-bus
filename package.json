@@ -22,6 +22,7 @@
     "deploy:table:dev": "cd db && sls deploy --stage dev",
     "deploy:auth:dev": "cd auth-backend && sls deploy --stage dev",
     "deploy:auth:prod": "cd auth-backend && sls deploy --stage prod",
+    "offline:auth:dev": "cd auth-backend && sls offline --stage dev",
     "flush:prod": "aws cloudfront create-invalidation --distribution-id ECRPR20932SE2 --paths \"/*\"",
     "flush:dev": "aws cloudfront create-invalidation --distribution-id E3MVE0FQT5FY6M --paths \"/*\""
   },

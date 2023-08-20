@@ -15,8 +15,8 @@ custom:
     dev: dev
     prod: prod
   environment: ${self:custom.environments.${self:custom.stage}, self:custom.environments.dev}
-  busTableName: !ImportValue ExtPennyTableName-${self:custom.environment}
-  busTableARN: !ImportValue ExtPennyTableARN-${self:custom.environment}
+  busTableName: ${ssm:/penny/${self:custom.stage}/dynamo/PennyTable/name}
+  busTableARN: ${ssm:/penny/${self:custom.stage}/dynamo/PennyTable/arn}
   esbuild:
     bundle: true
     minify: true
@@ -32,6 +32,8 @@ functions:
   Create:
     handler: ./Create.handler
     role: BusTableLambdaRole
+    environment:
+      BUS_TABLE: ${self:custom.busTableName}
     events:
       - http:
           method: POST

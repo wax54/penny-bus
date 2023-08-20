@@ -1,6 +1,7 @@
 import { PartitionName } from "../bus-backend/utils/busTable";
 import { logger } from "../logger";
 import { BlogData, BlogKeyComponents } from "../types";
+import { UserCreateParams } from "../types/user";
 
 export const BlogApi = {
   // V2
@@ -121,4 +122,31 @@ export const BlogApi = {
       return { success: false, error: "unknown" };
     }
   },
+};
+
+
+
+export const AuthApi = {
+  create: async (user: UserCreateParams): Promise<{ success: boolean, token: string } & any> => {
+    const createUrl = new URL(
+      `/auth/create`,
+      process.env.NEXT_PUBLIC_SITE_URL
+    );
+    try {
+      const res = await fetch(createUrl, {
+        method: "POST",
+        body: JSON.stringify(user),
+      });
+      const body = await res.json();
+      return body;
+    } catch (e) {
+      logger(e);
+      console.log(e);
+      return { success: false, error: "unknown" };
+    }
+  },
+  login: () => {
+    throw Error('NOT IMPLEMENTED')
+  }
+
 };

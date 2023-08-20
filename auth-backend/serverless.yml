@@ -8,25 +8,25 @@ provider:
   versionFunctions: false
   logRetentionInDays: 30
   environment:
-    AUTH_TABLE: ${self:custom.AuthTableName}
+    AUTH_TABLE: ${self:custom.authTableName}
 custom:
   stage: ${opt:stage, self:provider.stage}
   environments:
     dev: dev
     prod: prod
   environment: ${self:custom.environments.${self:custom.stage}, self:custom.environments.dev}
-  AuthTableName: !ImportValue ExtAuthTableName-${self:custom.environment}
-  AuthTableARN: !ImportValue ExtAuthTableARN-${self:custom.environment}
-  # esbuild:
-  #   bundle: true
-  #   minify: true
-  #   exclude:
-  #     - "*"
-  #   external:
-  #     - next
+  authTableName: ${ssm:/global/${self:custom.stage}/dynamo/AuthTable/name}
+  authTableARN: ${ssm:/global/${self:custom.stage}/dynamo/AuthTable/arn}
+  esbuild:
+    bundle: true
+    minify: true
+    exclude:
+      - "*"
+    external:
+      - next
 
 plugins:
-  # - serverless-esbuild
+  - serverless-esbuild
   - serverless-offline
 functions:
   Create:
@@ -35,7 +35,7 @@ functions:
     events:
       - http:
           method: POST
-          path: api/user/create
+          path: auth/create
 
   Login:
     handler: ./Login.handler
@@ -43,7 +43,7 @@ functions:
     events:
       - http:
           method: POST
-          path: api/user/login
+          path: auth/login
 
   Refresh:
     handler: ./Refresh.handler
@@ -51,7 +51,7 @@ functions:
     events:
       - http:
           method: POST
-          path: api/user/refresh
+          path: auth/refresh
 
   Authenticate:
     handler: ./Authenticate.handler
@@ -59,7 +59,7 @@ functions:
     events:
       - http:
           method: POST
-          path: api/user/authenticate
+          path: auth/authenticate
 
 resources:
   Resources:
@@ -93,10 +93,18 @@ resources:
               Statement:
                 - Effect: "Allow"
                   Action:
-                    - "dynamodb:GetItem"
                     - "dynamodb:PutItem"
                     - "dynamodb:UpdateItem"
-                  Resource: ${self:custom.AuthTableARN}
+                    - "dynamodb:DeleteItem"
+                    - "dynamodb:BatchWriteItem"
+                    - "dynamodb:GetItem"
+                    - "dynamodb:BatchGetItem"
+                    - "dynamodb:Scan"
+                    - "dynamodb:Query"
+                    - "dynamodb:ConditionCheckItem"
+                  Resource: 
+                    - '${self:custom.authTableARN}'
+                    - '${self:custom.authTableARN}/index/*'
 
     ReadAuthTableLambdaRole:
       Type: "AWS::IAM::Role"
@@ -129,7 +137,7 @@ resources:
                 - Effect: "Allow"
                   Action:
                     - "dynamodb:GetItem"
-                  Resource: ${self:custom.AuthTableARN}
+                  Resource: ${self:custom.authTableARN}
 
     DeleteAuthTableLambdaRole:
       Type: "AWS::IAM::Role"
@@ -162,7 +170,7 @@ resources:
                 - Effect: "Allow"
                   Action:
                     - "dynamodb:DeleteItem"
-                  Resource: ${self:custom.AuthTableARN}
+                  Resource: ${self:custom.authTableARN}
   Outputs:
     PennyAuthAPI:
       Value:

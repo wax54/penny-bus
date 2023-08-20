@@ -126,29 +126,9 @@ resources:
         Name: /global/${self:custom.stage}/dynamo/AuthTable/arn
         Type: String
         Value: !GetAtt AuthTable.Arn
-
     # PennyTableStreamArn:
     #   Type: AWS::SSM::Parameter
     #   Properties:
     #     Name: /penny/${self:custom.stage}/dynamo/relationTable/streamArn
     #     Type: String
     #     Value: !GetAtt PennyTable.StreamArn
-  Outputs:
-    PennyTableName:
-      Value:
-        Ref: PennyTable
-      Export:
-        Name: ExtPennyTableName-${self:custom.stage}
-    PennyTableARN:
-      Value: !GetAtt PennyTable.Arn
-      Export:
-        Name: ExtPennyTableARN-${self:custom.stage}
-    AuthTableName:
-      Value:
-        Ref: AuthTable
-      Export:
-        Name: ExtAuthTableName-${self:custom.stage}
-    AuthTableARN:
-      Value: !GetAtt AuthTable.Arn
-      Export:
-        Name: ExtAuthTableARN-${self:custom.stage}
