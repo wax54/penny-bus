@@ -7,12 +7,11 @@ import {
 } from "next";
 import { Layout } from "../../components/Layout";
 import { nav } from "../../constants/nav";
-import { BlogData } from "../../types";
+import { BlogData, PARTITIONS } from "../../types";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
-import { BlogApi } from "../../api";
+import { Api } from "../../api";
 import { NEW_BLOG_SLUG } from "../../constants/config";
-import { PARTITIONS } from "../../bus-backend/utils/busTable";
 
 export function BlogPost({ blog }: { blog: BlogData }) {
   console.log(blog);
@@ -102,8 +101,9 @@ export default function Blog({
   );
 }
 export async function getStaticPaths({}: GetStaticPathsContext): Promise<GetStaticPathsResult> {
-  const blogs = await BlogApi.getAll({ type: PARTITIONS.BLOG });
-  const keys = blogs.body?.items.map((blog) => ({ params: { slug: blog.slug } })) ?? [];
+  const blogs = await Api.getAll<BlogData>({ type: PARTITIONS.BLOG });
+  const keys =
+    blogs.body?.items.map((blog) => ({ params: { slug: blog.slug } })) ?? [];
   return {
     paths: keys,
     fallback: "blocking",
@@ -127,13 +127,12 @@ export async function getStaticProps(
   if (admin && slug === NEW_BLOG_SLUG) {
     return { props: { slug, admin } };
   }
-  console.log(slug)
-  const { success, body, error } = await BlogApi.get({
+  console.log(slug);
+  const { success, body, error } = await Api.get<BlogData>({
     type: PARTITIONS.BLOG,
     slug,
   });
-  console.log({ body, error, success })
-
+  console.log({ body, error, success });
 
   if (!success) {
     const redirect = new URLSearchParams({

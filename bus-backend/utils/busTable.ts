@@ -12,16 +12,12 @@ import {
   PutObjectToDynamo,
   UpdateObjectInDynamo,
 } from "../../shared-utils/dynamo";
+import { PartitionName } from "../../types/busTable";
 
 export const TABLES = {
   BUS: "bus",
 } as const;
 export type TableName = (typeof TABLES)[keyof typeof TABLES];
-
-export const PARTITIONS = {
-  BLOG: "blog",
-} as const;
-export type PartitionName = (typeof PARTITIONS)[keyof typeof PARTITIONS];
 
 const getTableName = (table: TableName): string => {
   let tableName;
@@ -65,11 +61,11 @@ export const busTable = {
   create: async (item: BusTableItem, options?: { forceCreate?: boolean }) => {
     return await PutObjectToDynamo({
       TableName: getTableName(TABLES.BUS),
-      Item: { ...item, PK: item.type, SK: item.slug } as BlogDBData,
+      Item: { ...item, PK: item.type, SK: item.slug } as BusTableDBItem,
 
       ConditionExpression: options?.forceCreate
         ? undefined
-        : "attribute_not_exists(PK)",
+        : "attribute_not_exists(PK) AND attribute_not_exists(SK)",
     });
   },
   update: async (item: Partial<BusTableItem> & BusTableKeyComponents) => {

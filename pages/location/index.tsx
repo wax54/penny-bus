@@ -1,29 +1,32 @@
 import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
-import { Layout } from "../../components/Layout";
 import { nav } from "../../constants/nav";
 import { useState } from "react";
-import { BlogData, PARTITIONS } from "../../types";
-import { Api,  } from "../../api";
-import { NEW_BLOG_SLUG } from "../../constants/config";
-const sortByDate = (a: BlogData, b: BlogData) =>
-  new Date(a.arrival).getTime() - new Date(b.arrival).getTime();
-const sortByTitle = (a: BlogData, b: BlogData) =>
-  a.title > b.title ? 1 : a.title === b.title ? 0 : -1;
+import { LocationData, PARTITIONS } from "../../types";
+import { Api } from "../../api";
+import { NEW_LOCATION_SLUG } from "../../constants/config";
+import { Layout } from "../../components/Layout";
+
+const sortByLat = (a: LocationData, b: LocationData) =>
+  a.pin.lat > b.pin.lat ? 1 : a.pin.lat === b.pin.lat ? 0 : -1;
+
+const sortByName = (a: LocationData, b: LocationData) =>
+  a.name > b.name ? 1 : a.name === b.name ? 0 : -1;
 
 const sortOptions = [
   {
-    label: "Date",
-    value: "date",
-    sortFunc: sortByDate,
+    label: "Name",
+    value: "name",
+    sortFunc: sortByName,
   },
   {
-    label: "Title",
-    value: "title",
-    sortFunc: sortByTitle,
+    label: "Latitude",
+    value: "latitude",
+    sortFunc: sortByLat,
   },
 ];
-export default function Blog({
-  blogs,
+
+export default function Location({
+  locations,
   admin,
 }: InferGetStaticPropsType<typeof getServerSideProps> & { admin?: boolean }) {
   const [sort, setSort] = useState(sortOptions[0]);
@@ -48,9 +51,9 @@ export default function Blog({
           fontSize: "2rem",
         }}
       >
-        Our BlogApi!
+        Our LocationApi!
       </h2>
-      {admin ? <a href={`./blog/${NEW_BLOG_SLUG}`}>New post</a> : null}
+      {admin ? <a href={`./location/${NEW_LOCATION_SLUG}`}>New post</a> : null}
 
       <div className="flex justify-end">
         <button
@@ -61,13 +64,17 @@ export default function Blog({
         </button>
       </div>
       <ol style={{ margin: 20 }}>
-        {blogs
-          ? blogs
+        {locations
+          ? locations
               .sort((a, b) => sort.sortFunc(a, b))
-              .map((blog) => (
-                <li key={blog.slug} style={{ margin: "auto" }} className="flex">
+              .map((location) => (
+                <li
+                  key={location.slug}
+                  style={{ margin: "auto" }}
+                  className="flex"
+                >
                   <a
-                    href={`./blog/${blog.slug}`}
+                    href={`./location/${location.slug}`}
                     className="flex-1 rounded-xl decoration-none bg-primary text-text-primary border-b-[2px] border-transparent hover:border-white hover:bg-secondary   hover:text-textSecondary cursor-pointer flex justify-between"
                     style={{
                       textTransform: "capitalize",
@@ -76,25 +83,31 @@ export default function Blog({
                       fontSize: "2rem",
                     }}
                   >
-                    <span style={{ flex: "0 0 auto" }}>{blog.title}</span>
+                    <span style={{ flex: "0 0 auto" }}>{location.name}</span>
                     <span style={{ flex: "0 0 auto" }}>
-                      {new Date(blog.arrival).toDateString()}
+                      {location.pin.lat}, {location.pin.lng}
+                    </span>
+                    <span style={{ flex: "0 0 auto" }}>
+                      {location.formattedAddress}
                     </span>
                   </a>
                 </li>
               ))
-          : "NO BLOGS"}
+          : "NO LOCATIONS"}
       </ol>
     </Layout>
   );
 }
 
 export async function getServerSideProps({}: GetStaticPropsContext) {
-  const response = await Api.getAll<BlogData>({ type: PARTITIONS.BLOG });
+  const response = await Api.getAll<LocationData>({
+    type: PARTITIONS.LOCATION,
+  });
+  console.log("repsonse");
   return {
     props: {
-      blogs: response.body?.items ?? [],
-      // blogs: [] as BlogData[]
+      locations: response.body?.items ?? [],
+      // locations: [] as LocationData[]
     },
   };
 }

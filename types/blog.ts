@@ -1,9 +1,5 @@
-import { PARTITIONS, PartitionName } from "../bus-backend/utils/busTable";
 
-export type MinBusDBData = {
-  PK: PartitionName;
-  SK: string;
-};
+import { PARTITIONS } from "./busTable";
 
 export type BlogKey = {
   PK: typeof PARTITIONS.BLOG;
@@ -11,8 +7,8 @@ export type BlogKey = {
 };
 
 export type BlogKeyComponents = {
-  slug: string;
   type: typeof PARTITIONS.BLOG;
+  slug: string;
 };
 
 export type BlogData = BlogKeyComponents & {
@@ -27,7 +23,3 @@ export type BlogData = BlogKeyComponents & {
   isHidden?: boolean;
 };
 export type BlogDBData = BlogKey & BlogData;
-
-export type BusTableItem = BlogData;
-export type BusTableKeyComponents = BlogKeyComponents;
-export type BusTableDBItem = MinBusDBData & BlogDBData;

@@ -1,27 +1,37 @@
-import { PartitionName } from "../bus-backend/utils/busTable";
 import { logger } from "../logger";
-import { BlogData, BlogKeyComponents } from "../types";
+import {
+  BlogData,
+  BusTableItem,
+  BusTableKeyComponents,
+  LocationData,
+  PartitionName,
+} from "../types";
 import { UserCreateParams } from "../types/user";
-
-export const BlogApi = {
+type DataType = {
+  blog: BlogData;
+  location: LocationData;
+};
+export const Api = {
   // V2
-  isViewable: (blog: BlogData): boolean => {
-    if (blog.isHidden === true) {
+  isViewable: <DataType extends { isHidden?: boolean; arrival?: boolean }>(
+    data: DataType
+  ): boolean => {
+    if (data.isHidden === true) {
       return false;
     }
-    if (!blog?.arrival) {
+    if (!data?.arrival) {
       return false;
     }
     return true;
   },
-  getAll: async ({
+  getAll: async <DataType extends BusTableItem>({
     type,
   }: {
     type: PartitionName;
   }): Promise<
     | {
         success: true;
-        body: { items: BlogData[]; total: number };
+        body: { items: DataType[]; total: number };
         error?: undefined;
       }
     | { success: false; error: string; body?: undefined }
@@ -39,11 +49,11 @@ export const BlogApi = {
       return { success: false, error: "unknown" };
     }
   },
-  get: async ({
+  get: async <DataType extends BusTableItem>({
     type,
     slug,
-  }: BlogKeyComponents): Promise<
-    | { success: true; body: BlogData; error?: undefined }
+  }: BusTableKeyComponents): Promise<
+    | { success: true; body: DataType; error?: undefined }
     | { success: false; error: string; body?: undefined }
   > => {
     const getURL = new URL(
@@ -63,8 +73,8 @@ export const BlogApi = {
     }
   },
 
-  update: async (
-    data: Partial<BlogData> & BlogKeyComponents
+  update: async <DataType extends BusTableItem>(
+    data: Partial<DataType>
   ): Promise<{ success: boolean } & any> => {
     const updateUrl = new URL(
       `/api/${data.type}/${data.slug}`,
@@ -84,7 +94,9 @@ export const BlogApi = {
     }
   },
 
-  create: async (data: BlogData): Promise<{ success: boolean } & any> => {
+  create: async <DataType extends BusTableItem>(
+    data: DataType
+  ): Promise<{ success: boolean } & any> => {
     const createUrl = new URL(
       `/api/${data.type}/${data.slug}/`,
       process.env.NEXT_PUBLIC_SITE_URL
@@ -104,7 +116,7 @@ export const BlogApi = {
   },
 
   delete: async (
-    data: BlogKeyComponents
+    data: BusTableKeyComponents
   ): Promise<{ success: boolean } & any> => {
     const createUrl = new URL(
       `/api/${data.type}/${data.slug}/`,
@@ -124,14 +136,11 @@ export const BlogApi = {
   },
 };
 
-
-
 export const AuthApi = {
-  create: async (user: UserCreateParams): Promise<{ success: boolean, token: string } & any> => {
-    const createUrl = new URL(
-      `/auth/create`,
-      process.env.NEXT_PUBLIC_SITE_URL
-    );
+  create: async (
+    user: UserCreateParams
+  ): Promise<{ success: boolean; token: string } & any> => {
+    const createUrl = new URL(`/auth/create`, process.env.NEXT_PUBLIC_SITE_URL);
     try {
       const res = await fetch(createUrl, {
         method: "POST",
@@ -146,7 +155,6 @@ export const AuthApi = {
     }
   },
   login: () => {
-    throw Error('NOT IMPLEMENTED')
-  }
-
+    throw Error("NOT IMPLEMENTED");
+  },
 };

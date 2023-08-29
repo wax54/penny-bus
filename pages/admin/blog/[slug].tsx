@@ -7,9 +7,8 @@ import {
 import * as publicSingleBlogPage from "../../blog/[slug]";
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BlogApi } from "../../../api";
-import { BlogData, BlogKeyComponents } from "../../../types";
-import { PARTITIONS } from "../../../bus-backend/utils/busTable";
+import { Api } from "../../../api";
+import { BlogData, BlogKeyComponents, PARTITIONS } from "../../../types";
 import { NEW_BLOG_SLUG } from "../../../constants/config";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -55,7 +54,7 @@ export const UpdateBlog = ({
     (updatedBlog: BlogData & BlogKeyComponents) => {
       setLoading(true);
       const manipulation =
-        slug === NEW_BLOG_SLUG ? BlogApi.create : BlogApi.update;
+        slug === NEW_BLOG_SLUG ? Api.create<BlogData> : Api.update<BlogData>;
       manipulation({ ...updatedBlog })
         .then(() => {
           setLoading(false);
@@ -73,7 +72,7 @@ export const UpdateBlog = ({
 
   const deleteBlog = useCallback(() => {
     setLoading(true);
-    const manipulation = BlogApi.delete;
+    const manipulation = Api.delete;
     manipulation({ type: currBlog.type, slug: currBlog.slug })
       .then((res) => {
         setLoading(false);

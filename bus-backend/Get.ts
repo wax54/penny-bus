@@ -3,9 +3,8 @@ import {
   APIGatewayProxyEvent,
   APIGatewayProxyResult,
 } from "aws-lambda";
-import AWS from "aws-sdk";
-import { BlogData, BusTableItem } from "../types";
-import { PARTITIONS, PartitionName, busTable } from "./utils/busTable";
+import {  PARTITIONS, PartitionName } from "../types";
+import { busTable } from "./utils/busTable";
 
 // import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
