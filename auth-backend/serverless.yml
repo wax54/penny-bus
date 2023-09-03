@@ -9,6 +9,8 @@ provider:
   logRetentionInDays: 30
   environment:
     AUTH_TABLE: ${self:custom.authTableName}
+  deploymentBucket:
+    name: serverless-deployment.pennybusproject.com
 custom:
   stage: ${opt:stage, self:provider.stage}
   environments:

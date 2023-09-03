@@ -7,6 +7,8 @@ provider:
   profile: home
   versionFunctions: false
   logRetentionInDays: 30
+  deploymentBucket:
+    name: serverless-deployment.pennybusproject.com
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -17,6 +19,47 @@ custom:
 
 resources:
   Resources:
+    PennyImageBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: image-${self:custom.stage}.pennybusproject.com
+        # AccessControl: PublicRead # No more AccessControl
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
+
+    PennyImageBucketName:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /penny/${self:custom.stage}/s3/ImageBucket/name
+        Type: String
+        Value: !Ref PennyImageBucket
+
+    PennyImageBucketPolicy:
+      Type: "AWS::S3::BucketPolicy"
+      Properties:
+        Bucket: !Ref PennyImageBucket
+        PolicyDocument:
+          Statement:
+            - Action:
+                - "s3:GetObject"
+              Effect: "Allow"
+              Principal: "*"
+              Resource:
+                "Fn::Join": ["", [!GetAtt PennyImageBucket.Arn, "/*"]]
+            - Action:
+                - "s3:ListBucket"
+              Effect: "Allow"
+              Principal: "*"
+              Resource: !GetAtt PennyImageBucket.Arn
+# TODO allow access via OAI
+# https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-bucket-user-policy-specifying-principal-intro.html#require-cloudfront-urls
+# "Principal":{"CanonicalUser":"Amazon S3 Canonical User ID assigned to origin access identity"}
+# Assign to cloudfront to access directly
+# Assign to Lambda? to access it through image service
+
     PennyTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: ${self:custom.deletionPolicy}
@@ -75,7 +118,6 @@ resources:
     #     Type: String
     #     Value: !GetAtt PennyTable.StreamArn
 
-
     AuthTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: ${self:custom.deletionPolicy}
@@ -126,9 +168,3 @@ resources:
         Name: /global/${self:custom.stage}/dynamo/AuthTable/arn
         Type: String
         Value: !GetAtt AuthTable.Arn
-    # PennyTableStreamArn:
-    #   Type: AWS::SSM::Parameter
-    #   Properties:
-    #     Name: /penny/${self:custom.stage}/dynamo/relationTable/streamArn
-    #     Type: String
-    #     Value: !GetAtt PennyTable.StreamArn

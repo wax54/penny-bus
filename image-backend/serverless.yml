@@ -1,4 +1,4 @@
-service: bus-backend
+service: image-backend
 
 provider:
   name: aws
@@ -7,18 +7,18 @@ provider:
   profile: home
   versionFunctions: false
   logRetentionInDays: 30
-  environment:
-    BUS_TABLE: ${self:custom.busTableName}
   deploymentBucket:
     name: serverless-deployment.pennybusproject.com
+  apiGateway:
+    binaryMediaTypes:
+      - "multipart/form-data"
 custom:
   stage: ${opt:stage, self:provider.stage}
   environments:
     dev: dev
     prod: prod
+  imageBucketName: ${ssm:/penny/${self:custom.stage}/s3/ImageBucket/name}
   environment: ${self:custom.environments.${self:custom.stage}, self:custom.environments.dev}
-  busTableName: ${ssm:/penny/${self:custom.stage}/dynamo/PennyTable/name}
-  busTableARN: ${ssm:/penny/${self:custom.stage}/dynamo/PennyTable/arn}
   esbuild:
     bundle: true
     minify: true
@@ -33,53 +33,20 @@ plugins:
 functions:
   Create:
     handler: ./Create.handler
-    role: BusTableLambdaRole
+    role: CreateImageLambdaRole
     environment:
-      BUS_TABLE: ${self:custom.busTableName}
+      IMAGE_BUCKET: ${self:custom.imageBucketName}
     events:
       - http:
           method: POST
-          path: api/{type}/{slug}
-          cors: true
-  Get:
-    handler: ./Get.handler
-    role: BusTableLambdaRole
-    events:
-      - http:
-          method: GET
-          path: api/{type}/{slug}
-          cors: true
-  GetAll:
-    handler: ./GetAll.handler
-    role: BusTableLambdaRole
-    events:
-      - http:
-          method: GET
-          path: api/{type}
-          cors: true
-  Update:
-    handler: ./Update.handler
-    role: BusTableLambdaRole
-    events:
-      - http:
-          method: PUT
-          path: api/{type}/{slug}
-          cors: true
-  Delete:
-    handler: ./Delete.handler
-    role: BusTableLambdaRole
-    events:
-      - http:
-          method: DELETE
-          path: api/{type}/{slug}
-          cors: true
+          path: image/upload/resource
 
 resources:
   Resources:
-    BusTableLambdaRole:
+    CreateImageLambdaRole:
       Type: "AWS::IAM::Role"
       Properties:
-        RoleName: BusTableLambdaRole-${self:custom.stage}
+        RoleName: CreateImageLambdaRole-${self:custom.stage}
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -100,22 +67,20 @@ resources:
                     - logs:*
                   Resource: arn:aws:logs:*:*:*
 
-          - PolicyName: "PutBusSiteDB"
+          - PolicyName: "CreateImagePolicy"
             PolicyDocument:
               Version: "2012-10-17"
               Statement:
                 - Effect: "Allow"
                   Action:
-                    - "dynamodb:GetItem"
-                    - "dynamodb:Query"
-                    - "dynamodb:PutItem"
-                    - "dynamodb:UpdateItem"
-                    - "dynamodb:DeleteItem"
-                  Resource:
-                    ${self:custom.busTableARN}
+                    - "s3:*"
+                  Resource: 
+                    - "arn:aws:s3:::${self:custom.imageBucketName}/*"
+                    - "arn:aws:s3:::${self:custom.imageBucketName}"
+
   Outputs:
-    PennyBackendAPI:
+    ImageAPI:
       Value:
         Ref: ApiGatewayRestApi
       Export:
-        Name: ExtPennyBackendAPI-${self:custom.stage}
+        Name: ExtImageAPI-${self:custom.stage}
