@@ -46,6 +46,7 @@ resources:
     CreateImageLambdaRole:
       Type: "AWS::IAM::Role"
       Properties:
+        # This Role name is specified in the image bucket policy in the table service
         RoleName: CreateImageLambdaRole-${self:custom.stage}
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
@@ -54,7 +55,7 @@ resources:
               Principal:
                 Service:
                   - lambda.amazonaws.com
-                  - edgelambda.amazonaws.com
+                  # - edgelambda.amazonaws.com
               Action:
                 - sts:AssumeRole
         Policies:
@@ -74,7 +75,7 @@ resources:
                 - Effect: "Allow"
                   Action:
                     - "s3:*"
-                  Resource: 
+                  Resource:
                     - "arn:aws:s3:::${self:custom.imageBucketName}/*"
                     - "arn:aws:s3:::${self:custom.imageBucketName}"
 

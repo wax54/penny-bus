@@ -17,7 +17,7 @@ export const nav = [
   },
   {
     text: "Lifestyle",
-    href: "/faq",
+    href: "/lifestyle",
     isActive: true,
   },
   {

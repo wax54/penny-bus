@@ -54,11 +54,19 @@ resources:
               Effect: "Allow"
               Principal: "*"
               Resource: !GetAtt PennyImageBucket.Arn
-# TODO allow access via OAI
-# https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-bucket-user-policy-specifying-principal-intro.html#require-cloudfront-urls
-# "Principal":{"CanonicalUser":"Amazon S3 Canonical User ID assigned to origin access identity"}
-# Assign to cloudfront to access directly
-# Assign to Lambda? to access it through image service
+            - Action:
+                - "s3:PutObject"
+              Effect: "Allow"
+              Principal: 
+                AWS: "arn:aws:iam::454636868453:role/CreateImageLambdaRole-${self:custom.stage}"
+              Resource: 
+                "Fn::Join": ["", [!GetAtt PennyImageBucket.Arn, "/*"]]
+
+    # TODO allow access via OAI
+    # https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-bucket-user-policy-specifying-principal-intro.html#require-cloudfront-urls
+    # "Principal":{"CanonicalUser":"Amazon S3 Canonical User ID assigned to origin access identity"}
+    # Assign to cloudfront to access directly
+    # Assign to Lambda? to access it through image service
 
     PennyTable:
       Type: AWS::DynamoDB::Table

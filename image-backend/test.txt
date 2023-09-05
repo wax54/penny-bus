@@ -1,0 +1,30 @@
+
+   ┌──────────────────────────────────────────────────────────────────────────┐
+   │                                                                          │
+   │   POST | http://localhost:3000/dev/image/upload/resource                 │
+   │   POST | http://localhost:3000/2015-03-31/functions/Create/invocations   │
+   │                                                                          │
+   └──────────────────────────────────────────────────────────────────────────┘
+
+PXL_20230116_190603864.MP (1).jpg <Buffer c3 bf c3 98 c3 bf c3 a0 00 10 4a 46 49 46 00 01 01 00 00 01 00 01 00 00 c3 bf c3 a2 02 28 49 43 43 5f 50 52 4f 46 49 4c 45 00 01 01 00 00 02 18 00 00 ... 1763259 more bytes> image-dev.pennybusproject.com
+AccessDenied: Access Denied
+    at constructor.extractError (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:32:10388)
+    at constructor.callListeners (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:1:46381)
+    at constructor.emit (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:1:46089)
+    at constructor.emitEvent (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:2:28410)
+    at constructor.t (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:2:23969)
+    at Jm.runTo (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:2:1213)
+    at /Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:2:1425
+    at constructor.<anonymous> (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:2:24183)
+    at constructor.<anonymous> (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:2:28465)
+    at constructor.callListeners (/Users/sam/sams-code/penny-bus/image-backend/.esbuild/.build/Create.js:1:46486) {
+  code: 'AccessDenied',
+  region: null,
+  time: 2023-09-05T01:46:05.945Z,
+  requestId: 'KHW1NCM7X82W2KMY',
+  extendedRequestId: 'WJ9zSIZGeIumcAX/ptUxX6usAK0S82rUVHI0c6MXIEKGtH5522BxGyNNoRJn93uZGts5nI5e7vw=',
+  cfId: undefined,
+  statusCode: 403,
+  retryable: false,
+  retryDelay: 65.75787636484382
+}

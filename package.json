@@ -24,8 +24,8 @@
     "deploy:auth:prod": "cd auth-backend && sls deploy --stage prod",
     "deploy:image:dev": "cd image-backend && sls deploy --stage dev",
     "deploy:image:prod": "cd image-backend && sls deploy --stage prod",
-    "deploy:all:dev": "npm run deploy:table:dev && npm run deploy:auth:dev npm run deploy:image:dev npm run deploy:backend:dev npm run deploy:dev",
-    "deploy:all:prod": "npm run deploy:table:prod && npm run deploy:auth:prod npm run deploy:image:prod npm run deploy:backend:prod npm run deploy:prod",
+    "deploy:all:dev": "npm run deploy:table:dev && npm run deploy:auth:dev && npm run deploy:image:dev && npm run deploy:backend:dev && npm run deploy:dev",
+    "deploy:all:prod": "npm run deploy:table:prod && npm run deploy:auth:prod && npm run deploy:image:prod && npm run deploy:backend:prod && npm run deploy:prod",
     "flush:prod": "aws cloudfront create-invalidation --distribution-id ECRPR20932SE2 --paths \"/*\"",
     "flush:dev": "aws cloudfront create-invalidation --distribution-id E298D5J96K0X0A --paths \"/*\""
   },
@@ -41,7 +41,6 @@
     "mock-aws-s3": "^4.0.2",
     "next": "13.4.4",
     "nock": "^13.3.3",
-    "parse-multipart": "^1.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-markdown": "^8.0.7",
