@@ -22,10 +22,6 @@ custom:
   esbuild:
     bundle: true
     minify: true
-    exclude:
-      - "*"
-    external:
-      - next
 
 plugins:
   - serverless-esbuild
@@ -104,9 +100,9 @@ resources:
                     - "dynamodb:Scan"
                     - "dynamodb:Query"
                     - "dynamodb:ConditionCheckItem"
-                  Resource: 
-                    - '${self:custom.authTableARN}'
-                    - '${self:custom.authTableARN}/index/*'
+                  Resource:
+                    - "${self:custom.authTableARN}"
+                    - "${self:custom.authTableARN}/index/*"
 
     ReadAuthTableLambdaRole:
       Type: "AWS::IAM::Role"

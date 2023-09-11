@@ -1,4 +1,5 @@
 import { PARTITIONS } from "./busTable";
+import { Image } from "./image";
 
 export type LocationKey = {
   PK: typeof PARTITIONS.LOCATION;
@@ -27,7 +28,7 @@ export type LocationData = LocationKeyComponents & {
   streetLine2?: string;
   formattedAddress?: string;
   city?: string;
-  images?: string[];
+  images?: Image[];
   isHidden?: boolean;
 };
 

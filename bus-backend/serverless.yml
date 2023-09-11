@@ -22,10 +22,6 @@ custom:
   esbuild:
     bundle: true
     minify: true
-    exclude:
-      - "*"
-    external:
-      - next
 
 plugins:
   - serverless-esbuild
@@ -111,8 +107,7 @@ resources:
                     - "dynamodb:PutItem"
                     - "dynamodb:UpdateItem"
                     - "dynamodb:DeleteItem"
-                  Resource:
-                    ${self:custom.busTableARN}
+                  Resource: ${self:custom.busTableARN}
   Outputs:
     PennyBackendAPI:
       Value:

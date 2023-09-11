@@ -18,6 +18,12 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { states } from "../../../constants/states";
 import { countries } from "../../../constants/countries";
+import { Image } from "../../../types/image";
+import { ImageCreate200Response } from "../../../image-backend/types";
+
+const uploadImage = async (i: Image): Promise<ImageCreate200Response> => {
+  throw Error("Upload API not set up");
+}; //TODO
 
 // export const getStaticPaths = publicSingleLocationPage.getStaticPaths;
 export const getServerSideProps = (
@@ -46,12 +52,52 @@ export const UpdateLocation = ({
           zip: "",
           countryCode: "US",
           isHidden: true,
+          images: [],
         } as Partial<LocationData>)
   );
   const [currLocation, setCurrLocation] = useState<LocationData>(
     locationRef.current as LocationData
   );
+  const [imagesLoading, setImagesLoading] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [imageErrors, setImageErrors] = useState<{ message: string }[]>([]);
+  const uploadedImages = useRef<{ name: string; size: string }[]>([]);
+  useEffect(() => {
+    const _run = async () => {
+      if (location?.images && location.images.length) {
+        const toUpload = location.images.filter(
+          (image) =>
+            !uploadedImages.current.find(
+              (i) => i.name === image.name && i.size === image.size
+            )
+        );
+        await Promise.all(
+          toUpload.map(async (image) => {
+            setImagesLoading((names) => [...names, image.name]);
+            try {
+              const uploadResponse = await uploadImage(image);
+              setCurrLocation((location) => ({
+                ...location,
+                images: location.images?.map((i) => {
+                  return i.name === image.name && i.size === image.size
+                    ? { ...i, path: uploadResponse.data.path }
+                    : { ...i };
+                }),
+              }));
+            } catch (e: any) {
+              setImageErrors((errors) => [...errors, e]);
+            } finally {
+              setImagesLoading((names) =>
+                names.filter((name) => name !== image.name)
+              );
+            }
+          })
+        ).then(() => {});
+      }
+    };
+    _run();
+  }, [location?.images]);
+
   const inSync = Object.entries(currLocation).every(
     ([key, val]) =>
       JSON.stringify(val) ===
@@ -73,7 +119,7 @@ export const UpdateLocation = ({
           slug === NEW_BLOG_SLUG
             ? Api.create<LocationData>
             : Api.update<LocationData>;
-        manipulation({ ...updatedLocation as LocationData })
+        manipulation({ ...(updatedLocation as LocationData) })
           .then(() => {
             setLoading(false);
             locationRef.current = {
@@ -85,7 +131,7 @@ export const UpdateLocation = ({
             }
           })
           .catch((e) => {
-            alert(e)
+            alert(e);
             setLoading(false);
           });
       }
@@ -242,7 +288,9 @@ export const UpdateLocation = ({
           }}
         >
           {states.map((state) => (
-            <option key={state.code} value={state.code}>{state.name}</option>
+            <option key={state.code} value={state.code}>
+              {state.name}
+            </option>
           ))}
         </select>
 
@@ -273,9 +321,62 @@ export const UpdateLocation = ({
           }}
         >
           {countries.map((country) => (
-            <option key={country.code} value={country.code}>{country.name}</option>
+            <option key={country.code} value={country.code}>
+              {country.name}
+            </option>
           ))}
         </select>
+        <div>
+          <label htmlFor="img">Select image:</label>
+          <input
+            type="file"
+            multiple
+            id="images"
+            name="images"
+            accept="image/*"
+            className="my-4 p-4 w-full"
+            disabled={loading}
+            onChange={(evt) => {
+              const { files, name } = evt.target;
+              console.log({ files });
+              if (!files) {
+                alert("No files in upload");
+                return;
+              } else {
+                for (let i = 0; i < files.length; i++) {
+                  const file = files[i];
+                  file.text().then((data) => {
+                    setCurrLocation((location) => ({
+                      ...location,
+                      images: [
+                        ...(location?.images ?? []),
+                        {
+                          name: file.name,
+                          size: file.size,
+                          length: file.length,
+                          data,
+                        },
+                      ],
+                    }));
+                  });
+                }
+              }
+            }}
+          />
+
+          <div className="text-accent">
+            {" "}
+            {imageErrors.map((e) => (
+              <div>{e.message}</div>
+            ))}
+          </div>
+          <div className="text-accent">
+            {" "}
+            {imagesLoading.map((name) => (
+              <div>{name}</div>
+            ))}
+          </div>
+        </div>
         <div>
           <input
             id="isHidden"

@@ -2,20 +2,22 @@ import { APIGatewayEvent } from "aws-lambda";
 import AWS from "aws-sdk";
 import parseMultipart from "./parseMultipart";
 import config from "./config";
+import { ImageCreate200Response } from "./types";
 
 const s3 = new AWS.S3();
 
 export const handler = async (event: APIGatewayEvent) => {
   try {
+    const slug = event.pathParameters?.slug;
     const callerBaseFolder = "pennybusproject.com";
     const imageFolder = "images";
     const { filename, data } = extractFile(event);
-    console.log(filename, data, config.IMAGE_BUCKET);
-
+    const storedName =
+      slug + "." + new Date().getTime() + "." + filename.split(".")[-1];
     await s3
       .putObject({
         Bucket: config.IMAGE_BUCKET,
-        Key: [callerBaseFolder, imageFolder, filename].join("/"),
+        Key: [callerBaseFolder, imageFolder, storedName].join("/"),
         Body: data,
       })
       .promise();
@@ -23,12 +25,15 @@ export const handler = async (event: APIGatewayEvent) => {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        link: `https://dev.pennybusproject.com/images/${[
-          imageFolder,
-          filename,
-        ].join("/")}`,
-        s3: `https://${config.IMAGE_BUCKET}.s3.amazonaws.com/${filename}`,
-      }),
+        data: {
+          link: `https://dev.pennybusproject.com/${[
+            imageFolder,
+            storedName,
+          ].join("/")}`,
+          path: `${[imageFolder, storedName].join("/")}`,
+          s3: `https://${config.IMAGE_BUCKET}.s3.amazonaws.com/${imageFolder}/${storedName}`,
+        },
+      } as ImageCreate200Response),
     };
   } catch (err: any) {
     console.log(err);
@@ -53,14 +58,14 @@ function extractFile(event: APIGatewayEvent) {
       type: string;
       data: Buffer;
     }[];
-    const [{ filename, data }] = parts;
-
+    const [{ filename, data, type }] = parts;
     return {
       filename,
       data,
+      type,
     };
   } catch (e) {
-    console.log(e);
+    console.log("ERRORED", e);
     throw e;
   }
 }

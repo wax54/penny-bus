@@ -22,10 +22,6 @@ custom:
   esbuild:
     bundle: true
     minify: true
-    exclude:
-      - "*"
-    external:
-      - next
 
 plugins:
   - serverless-esbuild
@@ -39,7 +35,7 @@ functions:
     events:
       - http:
           method: POST
-          path: image/upload/resource
+          path: image/upload/resource/{slug}
 
 resources:
   Resources:
