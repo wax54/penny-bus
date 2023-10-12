@@ -29,7 +29,7 @@ plugins:
 functions:
   Create:
     handler: ./Create.handler
-    role: CreateImageLambdaRole
+    role: ImageLambdaRole
     environment:
       IMAGE_BUCKET: ${self:custom.imageBucketName}
     events:
@@ -37,13 +37,23 @@ functions:
           method: POST
           path: image/upload/resource/{slug}
 
+  RequestPut:
+    handler: ./RequestPut.handler
+    role: ImageLambdaRole
+    environment:
+      IMAGE_BUCKET: ${self:custom.imageBucketName}
+    events:
+      - http:
+          method: POST
+          path: image/upload
+
 resources:
   Resources:
-    CreateImageLambdaRole:
+    ImageLambdaRole:
       Type: "AWS::IAM::Role"
       Properties:
         # This Role name is specified in the image bucket policy in the table service
-        RoleName: CreateImageLambdaRole-${self:custom.stage}
+        RoleName: ImageLambdaRole-${self:custom.stage}
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
           Statement:
@@ -51,7 +61,6 @@ resources:
               Principal:
                 Service:
                   - lambda.amazonaws.com
-                  # - edgelambda.amazonaws.com
               Action:
                 - sts:AssumeRole
         Policies:

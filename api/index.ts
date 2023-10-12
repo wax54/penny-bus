@@ -158,3 +158,29 @@ export const AuthApi = {
     throw Error("NOT IMPLEMENTED");
   },
 };
+
+export const ImageApi = {
+  create: async (image: any): Promise<any> => {
+    const createUrl = new URL(
+      `/image/upload/resource/test`,
+      process.env.NEXT_PUBLIC_SITE_URL
+    );
+    const formData = new FormData();
+
+    for (const name in image) {
+      formData.append(name, image[name]);
+    }
+    try {
+      const response = await fetch(createUrl, {
+        method: "POST",
+        body: formData,
+      });
+      const body = await response.json();
+      return body;
+    } catch (e) {
+      logger(e);
+      console.log(e);
+      return { success: false, error: "unknown" };
+    }
+  },
+};

@@ -10,18 +10,17 @@ export const Layout = (props: {
 }) => {
   const page = props.style?.page ?? styles.page;
   return (
-    <div id="page" style={page.main}>
+    <div
+      id="page"
+      className="min-h-screen
+      bg-offWhite
+      "
+    >
       <div
         id="view"
-        className="min-h-screen
-      top-0
-      bottom-0
-      left-0
-      right-0
-      bg-offWhite
-      p-10"
+        className=""
       >
-        <Header nav={props.nav} styles={page} admin={props.admin} />
+        <Header nav={props.nav} admin={props.admin} />
         <div id="side-bar" style={page.sideBar} />
         {props.children}
       </div>

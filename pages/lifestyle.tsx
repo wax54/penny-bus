@@ -1,9 +1,33 @@
 import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { Layout } from "../components/Layout";
 import { nav } from "../constants/nav";
-import { useState } from "react";
-import { BlogData, PARTITIONS } from "../types";
-import { Api } from "../api";
+import { useRef } from "react";
+
+const LifestyleArticle = ({
+  article,
+}: {
+  article: { img: string; title: string; body: string };
+}) => {
+  const offset = useRef(Math.random() * 60 - 30);
+  return article ? (
+    <div className="m-10">
+      <div
+        className={` m-auto p-5 w-full md:w-[300px] bg-white rounded-xl `}
+        style={{
+          translate: `calc(${offset.current}vw )`,
+        }}
+      >
+        {article.img ? (
+          <div className="m-auto text-center w-full">
+            <img src={article.img} />
+          </div>
+        ) : null}
+        <h3 className="pt-3">{article.title}</h3>
+        <span>{article.body}</span>
+      </div>
+    </div>
+  ) : null;
+};
 
 export default function Lifestyle({
   articles,
@@ -28,21 +52,9 @@ export default function Lifestyle({
           backgroundImage: "url(/img/repeating-lifestyle.jpg)",
         }}
       >
-        {articles.map((article) => {
-          console.log({ article });
-
-          return article ? (
-            <div className="bg-white m-5">
-              {article.img ? (
-                <div className="m-auto text-center w-[300px] h-[300px]">
-                  <img src={article.img} />
-                  </div>
-              ) : null}
-              <h3>{article.title}</h3>
-              <span>{article.body}</span>
-            </div>
-          ) : null;
-        })}
+        {articles.map((article) => (
+          <LifestyleArticle key={article.title} article={article} />
+        ))}
       </div>
     </Layout>
   );

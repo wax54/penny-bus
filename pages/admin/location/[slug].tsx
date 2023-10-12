@@ -7,7 +7,7 @@ import {
 import * as publicSingleLocationPage from "../../location/[slug]";
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Api } from "../../../api";
+import { Api, ImageApi } from "../../../api";
 import {
   LocationData,
   LocationKeyComponents,
@@ -21,9 +21,8 @@ import { countries } from "../../../constants/countries";
 import { Image } from "../../../types/image";
 import { ImageCreate200Response } from "../../../image-backend/types";
 
-const uploadImage = async (i: Image): Promise<ImageCreate200Response> => {
-  throw Error("Upload API not set up");
-}; //TODO
+const isSameFile = (file: Pick<Image, "name" | "size">, compageFile: Image) =>
+  file.name === compageFile.name && file.size === compageFile.size;
 
 // export const getStaticPaths = publicSingleLocationPage.getStaticPaths;
 export const getServerSideProps = (
@@ -37,6 +36,7 @@ export const UpdateLocation = ({
   slug,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   console.log("location", slug);
+  console.log("location", location);
   const router = useRouter();
   const locationRef = useRef(
     location
@@ -64,39 +64,54 @@ export const UpdateLocation = ({
   const uploadedImages = useRef<{ name: string; size: string }[]>([]);
   useEffect(() => {
     const _run = async () => {
-      if (location?.images && location.images.length) {
-        const toUpload = location.images.filter(
-          (image) =>
-            !uploadedImages.current.find(
-              (i) => i.name === image.name && i.size === image.size
-            )
-        );
-        await Promise.all(
-          toUpload.map(async (image) => {
+      try {
+        console.log("running");
+        console.log(currLocation?.images);
+        if (currLocation?.images && currLocation.images.length) {
+          for (let i = 0; i < currLocation.images.length; i++) {
+            const image = currLocation.images[i];
+            console.log("starting to wait ", image, i);
+            if (uploadedImages.current.find((i) => isSameFile(i, image)))
+              continue;
+            uploadedImages.current.push(image);
+            console.log("starting to wait for all", image);
             setImagesLoading((names) => [...names, image.name]);
             try {
-              const uploadResponse = await uploadImage(image);
-              setCurrLocation((location) => ({
-                ...location,
-                images: location.images?.map((i) => {
-                  return i.name === image.name && i.size === image.size
-                    ? { ...i, path: uploadResponse.data.path }
+              console.log("awaiting image upload", image.name);
+              const uploadResponse = await ImageApi.create(image);
+              console.log("image upload finished", uploadResponse, image.name);
+              if (uploadResponse.statusCode !== 201) {
+                throw Error(uploadResponse.message);
+              }
+              setCurrLocation((currLocation) => ({
+                ...currLocation,
+                images: currLocation.images?.map((i) => {
+                  return isSameFile(i, image)
+                    ? { ...i, path: uploadResponse.data?.path }
                     : { ...i };
                 }),
               }));
             } catch (e: any) {
+              console.log("awaiting image errors", image.name);
+
               setImageErrors((errors) => [...errors, e]);
             } finally {
+              console.log("awaiting image final", image.name);
+
               setImagesLoading((names) =>
                 names.filter((name) => name !== image.name)
               );
             }
-          })
-        ).then(() => {});
+          }
+        }
+      } catch (e) {
+        console.log(e);
       }
     };
+    console.log("start");
+
     _run();
-  }, [location?.images]);
+  }, [currLocation?.images]);
 
   const inSync = Object.entries(currLocation).every(
     ([key, val]) =>
@@ -364,16 +379,16 @@ export const UpdateLocation = ({
             }}
           />
 
-          <div className="text-accent">
+          <div className="text-secondary">
             {" "}
             {imageErrors.map((e) => (
-              <div>{e.message}</div>
+              <div key={e.message}>{e.message}</div>
             ))}
           </div>
           <div className="text-accent">
             {" "}
             {imagesLoading.map((name) => (
-              <div>{name}</div>
+              <div key={name}>{name}</div>
             ))}
           </div>
         </div>

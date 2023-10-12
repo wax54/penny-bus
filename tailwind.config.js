@@ -9,6 +9,22 @@ module.exports = {
     // "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    screens: {
+      sm: "340px",
+      // => @media (min-width: 340px) { ... }
+
+      md: "680px",
+      // => @media (min-width: 680px) { ... }
+
+      lg: "724px",
+      // => @media (min-width: 724px) { ... }
+
+      xl: "1080px",
+      // => @media (min-width: 1080px) { ... }
+
+      "2xl": "1236px",
+      // => @media (min-width: 1236px) { ... }
+    },
     extend: {
       colors: {
         textPrimary: "#000000",
