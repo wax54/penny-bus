@@ -3,12 +3,17 @@ import { Layout } from "../components/Layout";
 import { nav } from "../constants/nav";
 import { useRef } from "react";
 
+const pins = ["/blue_pin.png", "/red_pin.png", "/bl_pin.png", "/yl_pin.png"];
+
 const LifestyleArticle = ({
   article,
 }: {
   article: { img: string; title: string; body: string };
 }) => {
-  const offset = useRef(Math.random() * 60 - 30);
+  const offset = useRef(Math.floor(Math.random() * 60 - 30));
+  const pinXOffset = useRef(Math.floor(Math.random() * 250));
+  const pinYOffset = useRef(Math.floor(Math.random() * 50 - 25));
+  const pinNumber = useRef(Math.floor(Math.random() * 4));
   return article ? (
     <div className="m-10">
       <div
@@ -17,6 +22,15 @@ const LifestyleArticle = ({
           translate: `calc(${offset.current}vw )`,
         }}
       >
+        <img
+          src={pins[pinNumber.current]}
+          alt="pin"
+          style={{
+            translate: `${pinXOffset.current}px ${pinYOffset.current}px `,
+          }}
+          className="rounded-full border-grey border-2"
+          width={50}
+        />
         {article.img ? (
           <div className="m-auto text-center w-full">
             <img src={article.img} />

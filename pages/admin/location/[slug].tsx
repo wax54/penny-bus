@@ -21,8 +21,10 @@ import { countries } from "../../../constants/countries";
 import { Image } from "../../../types/image";
 import { ImageCreate200Response } from "../../../image-backend/types";
 
-const isSameFile = (file: Pick<Image, "name" | "size">, compageFile: Image) =>
-  file.name === compageFile.name && file.size === compageFile.size;
+const isSameFile = (
+  file: Pick<Image, "name" | "size">,
+  compageFile: Pick<Image, "name" | "size">
+) => file.name === compageFile.name && file.size === compageFile.size;
 
 // export const getStaticPaths = publicSingleLocationPage.getStaticPaths;
 export const getServerSideProps = (
@@ -65,38 +67,30 @@ export const UpdateLocation = ({
   useEffect(() => {
     const _run = async () => {
       try {
-        console.log("running");
-        console.log(currLocation?.images);
         if (currLocation?.images && currLocation.images.length) {
           for (let i = 0; i < currLocation.images.length; i++) {
             const image = currLocation.images[i];
-            console.log("starting to wait ", image, i);
             if (uploadedImages.current.find((i) => isSameFile(i, image)))
               continue;
             uploadedImages.current.push(image);
-            console.log("starting to wait for all", image);
             setImagesLoading((names) => [...names, image.name]);
             try {
-              console.log("awaiting image upload", image.name);
               const uploadResponse = await ImageApi.create(image);
-              console.log("image upload finished", uploadResponse, image.name);
-              if (uploadResponse.statusCode !== 201) {
-                throw Error(uploadResponse.message);
+              if (uploadResponse.status !== 200) {
+                throw Error(uploadResponse.result);
               }
               setCurrLocation((currLocation) => ({
                 ...currLocation,
                 images: currLocation.images?.map((i) => {
                   return isSameFile(i, image)
-                    ? { ...i, path: uploadResponse.data?.path }
+                    ? { ...i, path: uploadResponse.storedName }
                     : { ...i };
                 }),
               }));
             } catch (e: any) {
-              console.log("awaiting image errors", image.name);
 
               setImageErrors((errors) => [...errors, e]);
             } finally {
-              console.log("awaiting image final", image.name);
 
               setImagesLoading((names) =>
                 names.filter((name) => name !== image.name)
@@ -348,7 +342,7 @@ export const UpdateLocation = ({
             multiple
             id="images"
             name="images"
-            accept="image/*"
+            accept="image/jpeg"
             className="my-4 p-4 w-full"
             disabled={loading}
             onChange={(evt) => {
@@ -360,35 +354,60 @@ export const UpdateLocation = ({
               } else {
                 for (let i = 0; i < files.length; i++) {
                   const file = files[i];
-                  file.text().then((data) => {
-                    setCurrLocation((location) => ({
-                      ...location,
-                      images: [
-                        ...(location?.images ?? []),
-                        {
-                          name: file.name,
-                          size: file.size,
-                          length: file.length,
-                          data,
-                        },
-                      ],
-                    }));
-                  });
+                  const reader = new FileReader();
+                  reader.onload = function (e) {
+                    const data = e.target?.result;
+                    if (data) {
+                      uploadedImages.current = uploadedImages.current.filter(
+                        (i) => !isSameFile(i, file)
+                      );
+                      setCurrLocation((location) => ({
+                        ...location,
+                        images: [
+                          ...(location?.images?.filter(
+                            (i) => !isSameFile(i, file)
+                          ) ?? []),
+                          {
+                            name: file.name,
+                            size: file.size,
+                            length: file.length,
+                            data,
+                          },
+                        ],
+                      }));
+                    }
+                  };
+                  reader.onerror = function (e) {
+                    console.log("Error : " + e.type);
+                  };
+                  reader.readAsDataURL(file);
                 }
               }
             }}
           />
-
           <div className="text-secondary">
-            {" "}
-            {imageErrors.map((e) => (
-              <div key={e.message}>{e.message}</div>
-            ))}
+            {imageErrors.map((e, i) =>
+              e.message ? (
+                <div key={e.message}>{e.message}</div>
+              ) : (
+                <div key={i}>Unkown Image Error</div>
+              )
+            )}
           </div>
           <div className="text-accent">
-            {" "}
-            {imagesLoading.map((name) => (
-              <div key={name}>{name}</div>
+            {currLocation.images?.map((image) => (
+              <div key={image.name}>
+                {image.name}
+                {image.path ? (
+                  <img
+                    width={200}
+                    height={200}
+                    src={`${process.env.NEXT_PUBLIC_SITE_URL}/images/${image.path}`}
+                  ></img>
+                ) : (
+                  <div>UPLOADING...</div>
+                )}
+              </div>
             ))}
           </div>
         </div>

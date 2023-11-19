@@ -6,7 +6,8 @@ import {
   LocationData,
   PartitionName,
 } from "../types";
-import { UserCreateParams } from "../types/user";
+import { Image } from "../types/image";
+import { UserCreateParams, UserLoginParams } from "../types/user";
 type DataType = {
   blog: BlogData;
   location: LocationData;
@@ -154,33 +155,79 @@ export const AuthApi = {
       return { success: false, error: "unknown" };
     }
   },
-  login: () => {
-    throw Error("NOT IMPLEMENTED");
-  },
-};
-
-export const ImageApi = {
-  create: async (image: any): Promise<any> => {
-    const createUrl = new URL(
-      `/image/upload/resource/test`,
-      process.env.NEXT_PUBLIC_SITE_URL
-    );
-    const formData = new FormData();
-
-    for (const name in image) {
-      formData.append(name, image[name]);
-    }
+  login: async (user: UserLoginParams) => {
+    const loginUrl = new URL(`/auth/login`, process.env.NEXT_PUBLIC_SITE_URL);
     try {
-      const response = await fetch(createUrl, {
+      const res = await fetch(loginUrl, {
         method: "POST",
-        body: formData,
+        body: JSON.stringify(user),
       });
-      const body = await response.json();
+      const body = await res.json();
       return body;
     } catch (e) {
       logger(e);
       console.log(e);
       return { success: false, error: "unknown" };
     }
+  },
+};
+
+export const ImageApi = {
+  getSignedUrl: async (name: string) => {
+    const requestPutUrl = new URL(
+      `/image/upload`,
+      process.env.NEXT_PUBLIC_SITE_URL
+    );
+    const response = await fetch(requestPutUrl, {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    });
+    const result = (await response.json()) as {
+      success: boolean;
+    } & (
+      | {
+          success: true;
+          url: string;
+          storedName: string;
+          type: "image/png" | "image/jpg" | "image/jpeg";
+        }
+      | {
+          success: false;
+          error: string;
+          info: any;
+        }
+    );
+
+    if (result.success === false) {
+      logger("error: ", result);
+      throw Error(result.error);
+    } else {
+      return { signedUrl: result.url, storedName: result.storedName };
+    }
+  },
+  create: async (image: Image) => {
+    const { signedUrl, storedName } = await ImageApi.getSignedUrl(image.name);
+
+    let binary = atob(image.data.split(",")[1]);
+
+    let array = [];
+    for (var i = 0; i < binary.length; i++) {
+      array.push(binary.charCodeAt(i));
+    }
+    let blobData = new Blob([new Uint8Array(array)], { type: "image/jpeg" });
+    const response = await fetch(signedUrl, {
+      method: "PUT",
+      body: blobData,
+    });
+    const imageUrl = signedUrl.split("?")[0];
+
+    const result = await response.text();
+    const status = await response.status;
+    return {
+      status,
+      imageUrl,
+      result,
+      storedName,
+    };
   },
 };

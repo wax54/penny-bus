@@ -17,6 +17,7 @@ import { AuthApi } from "../../api";
 import { UserCreateParams, UserLoginParams } from "../../types/user";
 import { useRouter } from "next/router";
 import { authRedirects } from "../../utils/auth";
+import { usePushMessage } from "../../providers";
 type UserFormValues = UserCreateParams & UserLoginParams;
 
 type GetTextReturnType = {
@@ -100,6 +101,7 @@ export const Auth = ({
     password: "",
     name: "",
   });
+  const pushMessage = usePushMessage();
 
   const gainAccess = useCallback(
     (user: UserFormValues) => {
@@ -109,14 +111,20 @@ export const Auth = ({
         pageSlug === "login" ? AuthApi.login : AuthApi.create;
       manipulation({ ...user })
         .then((data) => {
-          console.log(data);
           setLoading(false);
-          router.push("/admin/blog");
+          console.log(data);
+          if (data.success) {
+            window.localStorage.setItem("auth", data.token);
+            router.push("/admin/blog");
+          } else {
+            console.log(data);
+            pushMessage(data.error);
+          }
         })
         .catch((e) => {
           console.log(e);
-
           setLoading(false);
+          pushMessage({ message: e.message, type: "error" });
         });
     },
     [pageSlug, setLoading, router]
@@ -131,59 +139,60 @@ export const Auth = ({
   };
   return (
     <Layout nav={nav} style={styles}>
-      <div className="flex flex-col items-center">
-        <h1>{title}</h1>
+      <div>
+        <form className="flex flex-col items-center">
+          <h1>{title}</h1>
+          {username ? (
+            <Input
+              id="username"
+              name="username"
+              disabled={loading}
+              className="rounded p-4 w-[500px] "
+              {...username}
+              value={form.username}
+              onChange={handleChange}
+            />
+          ) : null}
+          {password ? (
+            <Input
+              type="password"
+              name="password"
+              className="p-4 w-[500px] rounded"
+              {...password}
+              disabled={loading}
+              value={form.password}
+              onChange={handleChange}
+            />
+          ) : null}
+          {name ? (
+            <Input
+              type="name"
+              name="name"
+              className=" p-4 w-[500px] rounded"
+              {...name}
+              disabled={loading}
+              value={form.name}
+              onChange={handleChange}
+            />
+          ) : null}
 
-        {username ? (
-          <Input
-            id="username"
-            name="username"
+          <button
+            type="submit"
             disabled={loading}
-            className="rounded p-4 w-[500px] "
-            {...username}
-            value={form.username}
-            onChange={handleChange}
-          />
-        ) : null}
-        {password ? (
-          <Input
-            type="password"
-            name="password"
-            className="p-4 w-[500px] rounded"
-            {...password}
-            disabled={loading}
-            value={form.password}
-            onChange={handleChange}
-          />
-        ) : null}
-        {name ? (
-          <Input
-            type="name"
-            name="name"
-            className=" p-4 w-[500px] rounded"
-            {...name}
-            disabled={loading}
-            value={form.name}
-            onChange={handleChange}
-          />
-        ) : null}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-7 rounded-xl p-4 bg-primary hover:bg-secondary w-[500px]"
-          onClick={() => gainAccess(form)}
-        >
-          {CTA.text}
-        </button>
-        {secondaryCTA ? (
-          <a
-            className="text-center rounded-xl bg-accent my-7 p-4 w-[500px] hover:bg-secondary"
-            href={secondaryCTA.href}
+            className="mt-7 rounded-xl p-4 bg-primary hover:bg-secondary w-[500px]"
+            onClick={() => gainAccess(form)}
           >
-            {secondaryCTA.text}
-          </a>
-        ) : null}
+            {CTA.text}
+          </button>
+          {secondaryCTA ? (
+            <a
+              className="text-center rounded-xl bg-accent my-7 p-4 w-[500px] hover:bg-secondary"
+              href={secondaryCTA.href}
+            >
+              {secondaryCTA.text}
+            </a>
+          ) : null}
+        </form>
       </div>
     </Layout>
   );

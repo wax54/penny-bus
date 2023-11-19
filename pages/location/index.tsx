@@ -84,9 +84,11 @@ export default function Location({
                     }}
                   >
                     <span style={{ flex: "0 0 auto" }}>{location.name}</span>
-                    <span style={{ flex: "0 0 auto" }}>
-                      {location.pin.lat}, {location.pin.lng}
-                    </span>
+                    {location.pin ? (
+                      <span style={{ flex: "0 0 auto" }}>
+                        {location.pin.lat}, {location.pin.lng}
+                      </span>
+                    ) : null}
                     <span style={{ flex: "0 0 auto" }}>
                       {location.formattedAddress}
                     </span>

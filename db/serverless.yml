@@ -26,6 +26,16 @@ resources:
         # AccessControl: PublicRead # No more AccessControl
         PublicAccessBlockConfiguration:
           BlockPublicAcls: false
+        CorsConfiguration:
+          CorsRules: 
+            - AllowedHeaders: 
+                - '*'
+              AllowedMethods: 
+                - 'PUT'
+                - 'GET'
+              AllowedOrigins: 
+                - '*'
+              ExposedHeaders:
         OwnershipControls:
           Rules:
             - ObjectOwnership: ObjectWriter
@@ -58,7 +68,7 @@ resources:
                 - "s3:PutObject"
               Effect: "Allow"
               Principal: 
-                AWS: "arn:aws:iam::454636868453:role/CreateImageLambdaRole-${self:custom.stage}"
+                AWS: "arn:aws:iam::454636868453:role/ImageLambdaRole-${self:custom.stage}"
               Resource: 
                 "Fn::Join": ["", [!GetAtt PennyImageBucket.Arn, "/*"]]
 
