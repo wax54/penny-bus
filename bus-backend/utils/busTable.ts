@@ -13,6 +13,7 @@ import {
   UpdateObjectInDynamo,
 } from "../../shared-utils/dynamo";
 import { PartitionName } from "../../types/busTable";
+import { pruneObject } from "./common";
 
 export const TABLES = {
   BUS: "bus",
@@ -22,9 +23,7 @@ export type TableName = (typeof TABLES)[keyof typeof TABLES];
 const getTableName = (table: TableName): string => {
   let tableName;
   if (table === TABLES.BUS) {
-    console.log("BUS")
     tableName = process.env.BUS_TABLE;
-    console.log(tableName)
   }
   if (!tableName) {
     throw Error("No table name defined for table " + table);
@@ -69,13 +68,15 @@ export const busTable = {
     });
   },
   update: async (item: Partial<BusTableItem> & BusTableKeyComponents) => {
+    const updates = formatUpdateRequest(item);
+
     return await UpdateObjectInDynamo({
       TableName: getTableName(TABLES.BUS),
-      Item: item,
       Key: {
         PK: item.type,
         SK: item.slug,
       } as MinBusDBData,
+      ...updates,
     });
   },
   delete: async (item: BusTableKeyComponents) => {
@@ -87,4 +88,37 @@ export const busTable = {
       } as MinBusDBData,
     });
   },
+};
+
+export const formatUpdateRequest = <Item extends Object>(
+  rawUpdateData: Item
+) => {
+  const updateData = pruneObject(rawUpdateData);
+  if (!Object.keys(updateData).length)
+    return {
+      updateString: undefined,
+      attributeNames: undefined,
+      attributeValues: undefined,
+    };
+  const [updates, attributeNames, attributeValues] = Object.entries(
+    updateData
+  ).reduce(
+    ([updates, attributeNames, attributeValues], [name, value]) => [
+      [...updates, `#${name} = :${name}`],
+      {
+        ...attributeNames,
+        [`#${name}`]: name,
+      },
+      {
+        ...attributeValues,
+        [`:${name}`]: value,
+      },
+    ],
+    [[] as string[], {} as Record<string, string>, {} as Record<string, any>]
+  );
+  return {
+    UpdateExpression: `SET ${updates.join(",")}`,
+    ExpressionAttributeValues: attributeValues,
+    ExpressionAttributeNames: attributeNames,
+  };
 };

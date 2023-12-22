@@ -1,4 +1,3 @@
-
 import { PARTITIONS } from "./busTable";
 
 export type BlogKey = {
@@ -18,6 +17,7 @@ export type BlogData = BlogKeyComponents & {
   departure: string;
   body?: string;
   author: string;
+  locationSlug: string;
   fee?: number;
   bodyLink?: string;
   isHidden?: boolean;

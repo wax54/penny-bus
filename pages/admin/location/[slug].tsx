@@ -20,6 +20,7 @@ import { states } from "../../../constants/states";
 import { countries } from "../../../constants/countries";
 import { Image } from "../../../types/image";
 import { ImageCreate200Response } from "../../../image-backend/types";
+import { ImagePreview } from "../../../components/ImagePreview";
 
 const isSameFile = (
   file: Pick<Image, "name" | "size">,
@@ -50,6 +51,7 @@ export const UpdateLocation = ({
           locationType: "",
           fee: 0,
           rate: "nightly",
+          city: "",
           state: "",
           zip: "",
           countryCode: "US",
@@ -70,7 +72,10 @@ export const UpdateLocation = ({
         if (currLocation?.images && currLocation.images.length) {
           for (let i = 0; i < currLocation.images.length; i++) {
             const image = currLocation.images[i];
-            if (uploadedImages.current.find((i) => isSameFile(i, image)))
+            if (
+              image.path ||
+              uploadedImages.current.find((i) => isSameFile(i, image))
+            )
               continue;
             uploadedImages.current.push(image);
             setImagesLoading((names) => [...names, image.name]);
@@ -83,15 +88,13 @@ export const UpdateLocation = ({
                 ...currLocation,
                 images: currLocation.images?.map((i) => {
                   return isSameFile(i, image)
-                    ? { ...i, path: uploadResponse.storedName }
+                    ? { ...i, path: uploadResponse.storedName, data: undefined }
                     : { ...i };
                 }),
               }));
             } catch (e: any) {
-
               setImageErrors((errors) => [...errors, e]);
             } finally {
-
               setImagesLoading((names) =>
                 names.filter((name) => name !== image.name)
               );
@@ -282,6 +285,17 @@ export const UpdateLocation = ({
           }}
         />
 
+        <input
+          name="city"
+          className="my-4 p-4 w-full"
+          disabled={loading}
+          placeholder="City"
+          value={currLocation.city}
+          onChange={(evt) => {
+            const { value, name } = evt.target;
+            setCurrLocation((location) => ({ ...location, [name]: value }));
+          }}
+        />
         <select
           name="state"
           className="my-4 p-4 w-full"
@@ -398,12 +412,27 @@ export const UpdateLocation = ({
             {currLocation.images?.map((image) => (
               <div key={image.name}>
                 {image.name}
+                <input
+                  name={"ref" + image.name}
+                  className="my-4 p-4 w-full text-primary"
+                  disabled={loading}
+                  placeholder="Image ref"
+                  value={image.ref ?? image.name}
+                  onChange={(evt) => {
+                    const { value } = evt.target;
+                    console.log({ value });
+                    setCurrLocation((location) => ({
+                      ...location,
+                      images: currLocation.images?.map((i) => {
+                        return isSameFile(i, image)
+                          ? { ...i, ref: value || image.name }
+                          : { ...i };
+                      }),
+                    }));
+                  }}
+                />
                 {image.path ? (
-                  <img
-                    width={200}
-                    height={200}
-                    src={`${process.env.NEXT_PUBLIC_SITE_URL}/images/${image.path}`}
-                  ></img>
+                  <ImagePreview image={image} />
                 ) : (
                   <div>UPLOADING...</div>
                 )}

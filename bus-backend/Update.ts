@@ -4,7 +4,13 @@ import {
   APIGatewayProxyResult,
 } from "aws-lambda";
 import AWS from "aws-sdk";
-import { BlogData, BusTableItem, BusTableKeyComponents, PARTITIONS, PartitionName } from "../types";
+import {
+  BlogData,
+  BusTableItem,
+  BusTableKeyComponents,
+  PARTITIONS,
+  PartitionName,
+} from "../types";
 import { busTable } from "./utils/busTable";
 
 // import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -48,6 +54,7 @@ export const handler: Handler = async (
     const body = getBody(event);
     if (body) {
       console.log({ body });
+
       const a = await busTable.update(body);
       console.log({ a });
     }

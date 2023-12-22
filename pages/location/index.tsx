@@ -53,9 +53,15 @@ export default function Location({
       >
         Our LocationApi!
       </h2>
-      {admin ? <a href={`./location/${NEW_LOCATION_SLUG}`}>New post</a> : null}
-
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        {admin ? (
+          <a
+            className="rounded bg-primary/50 px-4 py-2 ml-2 hover:bg-secondary/50 hover:text-textSecondary"
+            href={`./location/${NEW_LOCATION_SLUG}`}
+          >
+            New post
+          </a>
+        ) : null}
         <button
           className="rounded bg-primary/50 px-4 py-2 mr-2 hover:bg-secondary/50 hover:text-textSecondary"
           onClick={progressSort}
@@ -63,6 +69,7 @@ export default function Location({
           Sort by: {sort.label}
         </button>
       </div>
+
       <ol style={{ margin: 20 }}>
         {locations
           ? locations

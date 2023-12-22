@@ -62,11 +62,9 @@ export async function PutObjectToDynamo(
   });
 }
 
-export async function UpdateObjectInDynamo(params: {
-  TableName: string;
-  Item: { [key: string]: any };
-  Key: { [key: string]: any };
-}): Promise<DynamoDBType.DocumentClient.UpdateItemOutput> {
+export async function UpdateObjectInDynamo(
+  params: DynamoDBType.DocumentClient.UpdateItemInput
+): Promise<DynamoDBType.DocumentClient.UpdateItemOutput> {
   return await new Promise((res, rej) => {
     DynamoDB.update(params, function (err: Error, data: any) {
       console.log({ err, stack: err?.stack, data });

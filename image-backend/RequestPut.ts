@@ -12,7 +12,7 @@ const CALLER_BASE_FOLDER = "pennybusproject.com";
 const IMAGE_FOLDER = "images";
 
 const getType = (fileSuffix: "jpg" | "jpeg" | "png" | string) => {
-  switch (fileSuffix) {
+  switch (fileSuffix.toLowerCase()) {
     case "jpeg":
     case "jpg":
       return "image/jpeg";

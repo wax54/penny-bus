@@ -45,6 +45,14 @@ const getTableName = (table: TableName): string => {
 
 export const authTable = {
   user: {
+    getKeys: (
+      item: UserKeyComponents & Partial<UserGSI1KeyComponents>
+    ): Partial<UserKey & UserGSI1Key> => {
+      return {
+        ...authTable.user.getKey(item),
+        ...authTable.user.getGSI1Key(item),
+      };
+    },
     getKey: (item: UserKeyComponents): UserKey | undefined => {
       if (item.id && item.type) {
         return { PK: item.type, SK: item.id };
@@ -119,8 +127,7 @@ export const authTable = {
         TableName: getTableName(TABLES.AUTH),
         Item: {
           ...item,
-          ...authTable.user.getKey(item),
-          ...authTable.user.getGSI1Key(item),
+          ...authTable.user.getKeys(item),
         },
         ConditionExpression: options?.forceCreate
           ? undefined

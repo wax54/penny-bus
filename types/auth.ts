@@ -10,8 +10,7 @@ export type TokenKey = {
   SK: string;
 };
 
-
-export type UserKeys = UserKey & UserGSI1Key; 
+export type UserKeys = UserKey & UserGSI1Key;
 
 export type UserKey = {
   PK: typeof PARTITIONS.USER;
@@ -63,3 +62,10 @@ export type AuthTableItem = UserData | TokenData;
 export type AuthTableKeyComponents = UserKeyComponents | TokenKeyComponents;
 export type AuthTableGSI1KeyComponents = UserGSI1KeyComponents;
 export type AuthTableDBItem = MinAuthDBData & (UserDBData | TokenDBData);
+
+//API inputs
+export type CreateUserInput = {
+  username: string;
+  password: string;
+  name: string;
+} & Partial<UserData>;

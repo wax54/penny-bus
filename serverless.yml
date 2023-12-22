@@ -182,7 +182,7 @@ resources:
                     [
                       "",
                       [
-                        "${self:custom.backendApi}",
+                        "${self:custom.authApi}",
                         ".execute-api.${self:provider.region}.amazonaws.com",
                       ],
                     ],

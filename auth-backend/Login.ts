@@ -5,11 +5,9 @@ import {
 } from "aws-lambda";
 import bcrypt from "bcrypt";
 
-import AWS from "aws-sdk";
 import { PARTITIONS, authTable } from "./utils/authTable";
 import { UserData } from "../types";
-import { randomUUID } from "crypto";
-import { encodeUserToken } from "./utils/token";
+import { createToken} from "./utils/token";
 
 export type LoginUserInput = {
   username: string;
@@ -34,25 +32,18 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    console.log({ event });
     const { password, username } = getBody(event);
-    const user = (await authTable.user.getByUsername({
+    const user = await authTable.user.getByUsername({
       type: PARTITIONS.USER,
       username,
-    })) as UserData;
+    });
+    if (!user) {
+      throw Error("User not found");
+    }
 
     const verified = await bcrypt.compare(password, user.hash);
     if (verified) {
-      const tokenHash = randomUUID();
-
-      const b = await authTable.token.create({
-        type: PARTITIONS.TOKEN,
-        tokenHash,
-        id: user.id,
-        valid: true,
-        createdAt: new Date().getTime(),
-      });
-      const token = encodeUserToken({ id: user.id, tokenHash });
+      const token = await createToken(user);
 
       return {
         statusCode: 200,
@@ -62,13 +53,7 @@ export const handler: Handler = async (
         }),
       };
     } else {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({
-          success: false,
-          message: "username or password not found",
-        }),
-      };
+      throw Error("Invalid password");
     }
   } catch (e: any) {
     console.log(e);

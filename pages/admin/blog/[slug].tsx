@@ -8,10 +8,17 @@ import * as publicSingleBlogPage from "../../blog/[slug]";
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Api } from "../../../api";
-import { BlogData, BlogKeyComponents, PARTITIONS } from "../../../types";
+import {
+  BlogData,
+  BlogKeyComponents,
+  LocationData,
+  PARTITIONS,
+} from "../../../types";
 import { NEW_BLOG_SLUG } from "../../../constants/config";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { useLocations } from "../../../providers/dataStore";
+import { ImagePreview } from "../../../components/ImagePreview";
 
 // export const getStaticPaths = publicSingleBlogPage.getStaticPaths;
 export const getServerSideProps = (
@@ -35,6 +42,7 @@ export const UpdateBlog = ({
           title: "",
           subtitle: "",
           arrival: "",
+          locationSlug: "",
           departure: "",
           body: "",
           author: "",
@@ -42,6 +50,7 @@ export const UpdateBlog = ({
           isHidden: true,
         } as BlogData)
   );
+  const locations = useLocations();
   const [currBlog, setCurrBlog] = useState(blogRef.current);
   const [loading, setLoading] = useState(false);
   const inSync = Object.entries(currBlog).every(
@@ -81,6 +90,7 @@ export const UpdateBlog = ({
       })
       .catch((e) => setLoading(false));
   }, [slug, setLoading, router]);
+
   return (
     <div className="bg-offWhite flex flex-column sm:flex-row">
       <Link href="/admin/blog">Blog list</Link>
@@ -138,7 +148,33 @@ export const UpdateBlog = ({
             setCurrBlog((blog) => ({ ...blog, [name]: value }));
           }}
         />
-
+        {locations?.loading ? (
+          "..."
+        ) : locations?.data ? (
+          <select
+            name="locationSlug"
+            className="my-4 p-4 w-full"
+            placeholder="Location"
+            disabled={loading}
+            value={currBlog.locationSlug}
+            onChange={(evt) => {
+              const { value, name } = evt.target;
+              setCurrBlog((blog) => ({
+                ...blog,
+                [name]: value,
+              }));
+            }}
+          >
+            <option value="">Select</option>
+            {locations.data.map((location) => (
+              <option key={location.slug} value={location.slug}>
+                {location.name} ({location.city})
+              </option>
+            ))}
+          </select>
+        ) : (
+          "ERROR: " + (locations?.error ?? "unknown")
+        )}
         <input
           name="fee"
           className="my-4 p-4 w-full"
@@ -191,7 +227,31 @@ export const UpdateBlog = ({
           value={currBlog.body}
           onChange={(evt) => {
             const { value } = evt.target;
-            setCurrBlog((blog) => ({ ...blog, body: value }));
+            const _replace = (value: string) => {
+              const locationImages =
+                currBlog.locationSlug &&
+                locations?.data &&
+                locations.data.find(
+                  (location) => location.slug === currBlog.locationSlug
+                )?.images;
+              if (!locationImages) {
+                return value;
+              } else {
+                for (let image of locationImages) {
+                  value = value.replace(
+                    `{{${image.ref}}}`,
+                    `![test](${process.env.NEXT_PUBLIC_SITE_URL}/images/${image.path})`
+                  );
+                  value = value.replace(
+                    `{{${image.name}}`,
+                    `![test](${process.env.NEXT_PUBLIC_SITE_URL}/images/${image.path ?? ""})`
+                  );
+                }
+              }
+              return value;
+            };
+            const valWithReplacement = _replace(value);
+            setCurrBlog((blog) => ({ ...blog, body: valWithReplacement }));
           }}
         />
 
@@ -213,6 +273,12 @@ export const UpdateBlog = ({
           <option value="Zoë Williams">Z-Word</option>
           <option value="Sam Crewe-Sullam">SAMMA</option>
         </select>
+
+        {currBlog?.locationSlug && locations?.data
+          ? locations.data
+              .find((l) => l.slug === currBlog.locationSlug)
+              ?.images?.map((image) => <ImagePreview image={image} />)
+          : null}
         <div>
           <input
             id="isHidden"

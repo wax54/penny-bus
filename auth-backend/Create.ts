@@ -3,19 +3,10 @@ import {
   APIGatewayProxyEvent,
   APIGatewayProxyResult,
 } from "aws-lambda";
-import bcrypt from "bcrypt";
 
-import { PARTITIONS, authTable } from "./utils/authTable";
-import { UserData } from "../types";
-import { randomUUID } from "crypto";
-import { encodeUserToken } from "./utils/token";
-const SALT_ROUNDS = 15;
-
-export type CreateUserInput = {
-  username: string;
-  password: string;
-  name: string;
-} & Partial<UserData>;
+import { CreateUserInput } from "../types";
+import { createToken } from "./utils/token";
+import { createUser } from "./utils/user";
 
 const getBody = (event: APIGatewayProxyEvent): CreateUserInput => {
   if (!event.body) throw Error("No body");
@@ -34,29 +25,11 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    console.log({ event });
-    const { password, ...body } = getBody(event);
-    console.log({ body });
-    const hash = await bcrypt.hash(password, SALT_ROUNDS);
-    const id = randomUUID();
-    const a = await authTable.user.create({
-      ...body,
-      hash,
-      type: PARTITIONS.USER,
+    const body = getBody(event);
+    const { id } = await createUser(body);
+    const token = await createToken({
       id,
-      createdAt: new Date().getTime(),
     });
-    const tokenHash = randomUUID();
-    const b = await authTable.token.create({
-      type: PARTITIONS.TOKEN,
-      tokenHash,
-      id,
-      valid: true,
-      createdAt: new Date().getTime(),
-    });
-
-    console.log({ a, b });
-    const token = encodeUserToken({ id, tokenHash });
     return {
       statusCode: 200,
       body: JSON.stringify({

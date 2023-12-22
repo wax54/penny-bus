@@ -4,4 +4,5 @@ export type Image = {
   length: any;
   data: any;
   path?: string;
+  ref?: string;
 };
