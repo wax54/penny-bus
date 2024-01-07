@@ -1,11 +1,7 @@
-import { useRouter } from "next/router";
-import { isCurrentPage } from "../utils";
-import { useEffect, useState } from "react";
-import { usePermissions } from "../providers/authProvider";
-import { NavItem, useNav } from "../hooks/useNav";
+import { useState } from "react";
+import { useNav } from "../hooks/useNav";
 
 export const Nav = () => {
-  const userPermissions = usePermissions();
   const nav = useNav();
   const [isHidden, setIsHidden] = useState(false);
   return (
@@ -21,7 +17,7 @@ export const Nav = () => {
           item.isActive ? (
             <a
               key={item.href}
-              href={userPermissions?.data?.admin ? "/admin" : "" + item.href}
+              href={item.href}
               className={`flex-1 text-center duration-500 text-textPrimary m-1 py-2 px-5 rounded-[10px] hover:bg-secondary hover:text-textSecondary ${
                 item.isCurrPage ? "bg-primary" : ""
               } ${

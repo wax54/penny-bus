@@ -53,11 +53,11 @@ export const useNav = () => {
       ...nav,
       ...(userPermissions?.data?.admin
         ? [
-            { href: "/admin/blog", text: "Blog management", isActive: false },
+            { href: "/admin/blog", text: "Blog management", isActive: true },
             {
               href: "/admin/location",
               text: "Location management",
-              isActive: false,
+              isActive: true,
             },
           ]
         : []),
@@ -66,7 +66,6 @@ export const useNav = () => {
         ? { ...item, isCurrPage: isCurrentPage(item.href) }
         : { ...item, isCurrPage: false }
     );
-  }, [userPermissions?.data?.admin, router, router.isReady]);
-
+  }, [userPermissions?.data?.admin, router, router.isReady, router.pathname]);
   return navItems;
 };
