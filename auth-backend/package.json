@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "aws-lambda": "^1.0.7",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "crypto": "^1.0.1"
   },
   "devDependencies": {

@@ -69,3 +69,5 @@ export type CreateUserInput = {
   password: string;
   name: string;
 } & Partial<UserData>;
+
+export type LoginUserInput = Pick<CreateUserInput, "username" | "password">;

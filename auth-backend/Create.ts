@@ -5,8 +5,8 @@ import {
 } from "aws-lambda";
 
 import { CreateUserInput } from "../types";
-import { createToken } from "./utils/token";
-import { createUser } from "./utils/user";
+import { User } from "./utils/user";
+import { Token } from "./utils/token";
 
 const getBody = (event: APIGatewayProxyEvent): CreateUserInput => {
   if (!event.body) throw Error("No body");
@@ -26,8 +26,8 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const body = getBody(event);
-    const { id } = await createUser(body);
-    const token = await createToken({
+    const { id } = await User.create(body);
+    const token = await Token.create({
       id,
     });
     return {

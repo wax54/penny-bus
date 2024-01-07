@@ -19,7 +19,7 @@ import {
   PutObjectToDynamo,
   UpdateObjectInDynamo,
 } from "../../shared-utils/dynamo";
-import { isOmittedExpression } from "typescript";
+import { pruneObject } from "./common";
 
 export const TABLES = {
   AUTH: "auth",
@@ -141,11 +141,12 @@ export const authTable = {
         username: item.username,
         type: PARTITIONS.USER,
       });
+      const updates = formatUpdateRequest({ item, ...GSI1Key });
       if (Key) {
         return await UpdateObjectInDynamo({
           TableName: getTableName(TABLES.AUTH),
-          Item: { item, ...GSI1Key },
           Key,
+          ...updates,
         });
       } else
         throw Error(
@@ -235,11 +236,12 @@ export const authTable = {
     invalidate: async (item: TokenKeyComponents & { valid: true }) => {
       const Key = authTable.token.getKey({ ...item });
       const NewKey = authTable.token.getKey({ ...item, valid: false });
+      const updates = formatUpdateRequest({ item, ...NewKey });
       if (Key) {
         return await UpdateObjectInDynamo({
           TableName: getTableName(TABLES.AUTH),
-          Item: { item, ...NewKey },
           Key,
+          ...updates,
         });
       } else {
         throw Error(
@@ -249,4 +251,37 @@ export const authTable = {
       }
     },
   },
+};
+
+export const formatUpdateRequest = <Item extends Object>(
+  rawUpdateData: Item
+) => {
+  const updateData = pruneObject(rawUpdateData);
+  if (!Object.keys(updateData).length)
+    return {
+      updateString: undefined,
+      attributeNames: undefined,
+      attributeValues: undefined,
+    };
+  const [updates, attributeNames, attributeValues] = Object.entries(
+    updateData
+  ).reduce(
+    ([updates, attributeNames, attributeValues], [name, value]) => [
+      [...updates, `#${name} = :${name}`],
+      {
+        ...attributeNames,
+        [`#${name}`]: name,
+      },
+      {
+        ...attributeValues,
+        [`:${name}`]: value,
+      },
+    ],
+    [[] as string[], {} as Record<string, string>, {} as Record<string, any>]
+  );
+  return {
+    UpdateExpression: `SET ${updates.join(",")}`,
+    ExpressionAttributeValues: attributeValues,
+    ExpressionAttributeNames: attributeNames,
+  };
 };

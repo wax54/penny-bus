@@ -171,6 +171,25 @@ export const AuthApi = {
       return { success: false, error: "unknown" };
     }
   },
+
+  get: async (token: string) => {
+    const getUserUrl = new URL(
+      `/auth/getUser`,
+      process.env.NEXT_PUBLIC_SITE_URL
+    );
+    try {
+      const res = await fetch(getUserUrl, {
+        method: "GET",
+        body: JSON.stringify({ token }),
+      });
+      const body = await res.json();
+      return body;
+    } catch (e) {
+      logger(e);
+      console.log(e);
+      return { success: false, error: "unknown" };
+    }
+  },
 };
 
 export const ImageApi = {

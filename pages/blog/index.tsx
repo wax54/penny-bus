@@ -3,7 +3,7 @@ import { Layout } from "../../components/Layout";
 import { nav } from "../../constants/nav";
 import { useState } from "react";
 import { BlogData, PARTITIONS } from "../../types";
-import { Api,  } from "../../api";
+import { Api } from "../../api";
 import { NEW_BLOG_SLUG } from "../../constants/config";
 const sortByDate = (a: BlogData, b: BlogData) =>
   new Date(a.arrival).getTime() - new Date(b.arrival).getTime();
@@ -38,7 +38,7 @@ export default function Blog({
   };
 
   return (
-    <Layout nav={nav} admin={admin}>
+    <Layout nav={nav} >
       <h2
         style={{
           color: "white",

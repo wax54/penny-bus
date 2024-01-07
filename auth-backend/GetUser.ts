@@ -24,27 +24,15 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const { token } = getBody(event);
+    const user = await User.get(token);
 
-    const { valid } = await User.authenticate(token);
-    if (valid) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          success: true,
-          valid: true,
-        }),
-      };
-    } else {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({
-          success: false,
-          valid: false,
-          message: "Token not valid, please try to refresh",
-          loginURL: "/refresh",
-        }),
-      };
-    }
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        success: true,
+        user,
+      }),
+    };
   } catch (e: any) {
     console.log(e);
     return {

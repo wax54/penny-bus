@@ -27,6 +27,7 @@ export const DataStoreProvider = ({ children }: { children: JSX.Element }) => {
   const [locations, setLocations] = useState<Loadable<LocationData[]>>({
     loading: true,
   });
+
   useEffect(() => {
     const _getLocations = async () => {
       setLocations((state) => ({ ...state, loading: true }));

@@ -3,6 +3,7 @@ import {
   ChangeEventHandler,
   EventHandler,
   useCallback,
+  useEffect,
   useState,
 } from "react";
 import { Layout } from "../../components/Layout";
@@ -18,6 +19,7 @@ import { UserCreateParams, UserLoginParams } from "../../types/user";
 import { useRouter } from "next/router";
 import { authRedirects } from "../../utils/auth";
 import { usePushMessage } from "../../providers";
+import { useAuthTools, usePermissions } from "../../providers/authProvider";
 type UserFormValues = UserCreateParams & UserLoginParams;
 
 type GetTextReturnType = {
@@ -91,10 +93,9 @@ const Input = ({
 export const Auth = ({
   pageSlug,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
+  const { login, signup, logout } = useAuthTools();
   const router = useRouter();
-  const { title, password, username, name, CTA, secondaryCTA } = getText({
-    pageSlug,
-  });
+
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     username: "",
@@ -107,29 +108,36 @@ export const Auth = ({
     (user: UserFormValues) => {
       //TODO Validation
       setLoading(true);
-      const manipulation =
-        pageSlug === "login" ? AuthApi.login : AuthApi.create;
-      manipulation({ ...user })
-        .then((data) => {
-          setLoading(false);
-          console.log(data);
-          if (data.success) {
-            window.localStorage.setItem("auth", data.token);
-            router.push("/admin/blog");
-          } else {
-            console.log(data);
-            pushMessage(data.error);
-          }
-        })
-        .catch((e) => {
-          console.log(e);
-          setLoading(false);
-          pushMessage({ message: e.message, type: "error" });
-        });
+      const manipulation = pageSlug === "login" ? login : signup;
+      manipulation
+        ? manipulation({ ...user })
+            .then((data: any) => {
+              setLoading(false);
+              console.log(data);
+              if (data.success) {
+                router.push("/admin/blog");
+              } else {
+                console.log(data);
+                pushMessage(data.error);
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+              setLoading(false);
+              pushMessage({ message: e.message, type: "error" });
+            })
+        : console.log("LOGIN/SIGNUP DOESN'T EXIST LET!");
     },
-    [pageSlug, setLoading, router]
+    [pageSlug, setLoading, router, login, signup]
   );
-
+  if (pageSlug === "logout") {
+    logout?.();
+    router.push("/");
+    return null;
+  }
+  const { title, password, username, name, CTA, secondaryCTA } = getText({
+    pageSlug,
+  });
   const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = evt.target;
     setForm((form) => ({
@@ -212,9 +220,9 @@ export const getStaticProps = ({
       redirect: { destination: "/", permanent: false },
     };
   }
-  if (["login", "create"].includes(params?.slug)) {
+  if (["login", "create", "logout"].includes(params?.slug)) {
     return {
-      props: { pageSlug: params.slug as "login" | "create" },
+      props: { pageSlug: params.slug as "login" | "create" | "logout" },
     };
   } else {
     return {

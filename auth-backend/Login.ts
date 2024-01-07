@@ -3,17 +3,10 @@ import {
   APIGatewayProxyEvent,
   APIGatewayProxyResult,
 } from "aws-lambda";
-import bcrypt from "bcrypt";
 
-import { PARTITIONS, authTable } from "./utils/authTable";
-import { UserData } from "../types";
-import { createToken} from "./utils/token";
-
-export type LoginUserInput = {
-  username: string;
-  password: string;
-  name: string;
-} & Partial<UserData>;
+import { LoginUserInput } from "../types";
+import { User } from "./utils/user";
+import { Token } from "./utils/token";
 
 const getBody = (event: APIGatewayProxyEvent): LoginUserInput => {
   if (!event.body) throw Error("No body");
@@ -32,29 +25,18 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const { password, username } = getBody(event);
-    const user = await authTable.user.getByUsername({
-      type: PARTITIONS.USER,
-      username,
-    });
-    if (!user) {
-      throw Error("User not found");
-    }
+    const loginBody = getBody(event);
 
-    const verified = await bcrypt.compare(password, user.hash);
-    if (verified) {
-      const token = await createToken(user);
+    const user = await User.login(loginBody);
+    const token = await Token.create(user);
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          success: true,
-          token,
-        }),
-      };
-    } else {
-      throw Error("Invalid password");
-    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        success: true,
+        token,
+      }),
+    };
   } catch (e: any) {
     console.log(e);
 
@@ -71,3 +53,6 @@ export const handler: Handler = async (
     // };
   }
 };
+function passCompare(password: string, hash: string) {
+  throw new Error("Function not implemented.");
+}

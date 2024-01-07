@@ -277,7 +277,7 @@ export const UpdateBlog = ({
         {currBlog?.locationSlug && locations?.data
           ? locations.data
               .find((l) => l.slug === currBlog.locationSlug)
-              ?.images?.map((image) => <ImagePreview image={image} />)
+            ?.images?.map((image) => <ImagePreview key={image.name} image={image} />)
           : null}
         <div>
           <input

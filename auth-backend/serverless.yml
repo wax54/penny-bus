@@ -25,7 +25,7 @@ custom:
     minify: false
     packagePath: package.json
     external:
-      - bcryot
+      - bcryptjs
 
 plugins:
   - serverless-esbuild
@@ -41,7 +41,7 @@ functions:
 
   Login:
     handler: Login.handler
-    role: ReadAuthTableLambdaRole
+    role: CreateAuthTableLambdaRole
     events:
       - http:
           method: POST
@@ -57,14 +57,46 @@ functions:
 
   Authenticate:
     handler: Authenticate.handler
-    role: ReadAuthTableLambdaRole
+    role: CreateAuthTableLambdaRole
     events:
       - http:
           method: POST
           path: auth/authenticate
 
+  GetUser:
+    handler: GetUser.handler
+    role: CreateAuthTableLambdaRole
+    events:
+      - http:
+          method: POST
+          path: auth/getUser
+
 resources:
   Resources:
+    AuthenticateLambdaRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: AuthenticateLambdaRole-${self:custom.stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - edgelambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: "LambdaRole-Policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - logs:*
+                  Resource: arn:aws:logs:*:*:*
+
     CreateAuthTableLambdaRole:
       Type: "AWS::IAM::Role"
       Properties:
@@ -107,39 +139,6 @@ resources:
                   Resource:
                     - "${self:custom.authTableARN}"
                     - "${self:custom.authTableARN}/index/*"
-
-    ReadAuthTableLambdaRole:
-      Type: "AWS::IAM::Role"
-      Properties:
-        RoleName: ReadAuthTableLambdaRole-${self:custom.stage}
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: "Allow"
-              Principal:
-                Service:
-                  - lambda.amazonaws.com
-                  - edgelambda.amazonaws.com
-              Action:
-                - sts:AssumeRole
-        Policies:
-          - PolicyName: "LambdaRole-Policy"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: "Allow"
-                  Action:
-                    - logs:*
-                  Resource: arn:aws:logs:*:*:*
-
-          - PolicyName: "ReadAuthDBPolicy"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: "Allow"
-                  Action:
-                    - "dynamodb:GetItem"
-                  Resource: ${self:custom.authTableARN}
 
     DeleteAuthTableLambdaRole:
       Type: "AWS::IAM::Role"

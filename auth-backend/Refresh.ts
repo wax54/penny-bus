@@ -4,7 +4,7 @@ import {
   APIGatewayProxyResult,
 } from "aws-lambda";
 import { authTable } from "./utils/authTable";
-import { createToken, validateToken } from "./utils/token";
+import { Token } from "./utils/token";
 export type RefreshUserInput = { token: string };
 
 const getBody = (event: APIGatewayProxyEvent): RefreshUserInput => {
@@ -25,9 +25,8 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const { token: oldToken } = getBody(event);
-    const oldTokenDetails = await validateToken(oldToken);
-
-    const newToken = await createToken(oldTokenDetails);
+    const oldTokenDetails = await Token.validate(oldToken);
+    const newToken = await Token.create(oldTokenDetails);
     await authTable.token.invalidate(oldTokenDetails);
     return {
       statusCode: 200,

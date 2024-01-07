@@ -48,7 +48,7 @@ export default function Lifestyle({
   admin,
 }: InferGetStaticPropsType<typeof getServerSideProps> & { admin?: boolean }) {
   return (
-    <Layout nav={nav} admin={admin}>
+    <Layout nav={nav}>
       <h2
         style={{
           color: "white",
