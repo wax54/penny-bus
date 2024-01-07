@@ -1,18 +1,12 @@
 import { useRouter } from "next/router";
 import { isCurrentPage } from "../utils";
 import { useEffect, useState } from "react";
-import { NavItem } from "../constants/nav";
+import { usePermissions } from "../providers/authProvider";
+import { NavItem, useNav } from "../hooks/useNav";
 
-export const Nav = (props: { nav: (NavItem & { isCurrPage?: boolean })[] }) => {
-  const router = useRouter();
-  const [nav, setNav] = useState(props.nav);
-  useEffect(() => {
-    if (router.isReady) {
-      setNav((items) =>
-        items.map((item) => ({ ...item, isCurrPage: isCurrentPage(item.href) }))
-      );
-    }
-  }, [router.isReady]);
+export const Nav = () => {
+  const userPermissions = usePermissions();
+  const nav = useNav();
   const [isHidden, setIsHidden] = useState(false);
   return (
     <div id="nav" className="max-w-screen pt-10">
@@ -27,10 +21,14 @@ export const Nav = (props: { nav: (NavItem & { isCurrPage?: boolean })[] }) => {
           item.isActive ? (
             <a
               key={item.href}
-              href={item.href}
+              href={userPermissions?.data?.admin ? "/admin" : "" + item.href}
               className={`flex-1 text-center duration-500 text-textPrimary m-1 py-2 px-5 rounded-[10px] hover:bg-secondary hover:text-textSecondary ${
                 item.isCurrPage ? "bg-primary" : ""
-              } ${isHidden ? "-translate-y-[200px] duration-500 hidden md:block sm:translate-y-0" : "block translate-y-0"}`}
+              } ${
+                isHidden
+                  ? "-translate-y-[200px] duration-500 hidden md:block sm:translate-y-0"
+                  : "block translate-y-0"
+              }`}
             >
               {item.text}
             </a>

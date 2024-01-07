@@ -1,6 +1,5 @@
 import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { Layout } from "../../components/Layout";
-import { nav } from "../../constants/nav";
 import { useState } from "react";
 import { BlogData, PARTITIONS } from "../../types";
 import { Api } from "../../api";
@@ -38,7 +37,7 @@ export default function Blog({
   };
 
   return (
-    <Layout nav={nav} >
+    <Layout>
       <h2
         style={{
           color: "white",

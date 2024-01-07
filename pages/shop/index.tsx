@@ -2,7 +2,6 @@ import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { IMAGE_PATH, SITE_URL } from "../../config";
 import { useEffect, useState } from "react";
 import { Layout } from "../../components/Layout";
-import { nav } from "../../constants/nav";
 
 const ImageSlideShow = (
   props: {
@@ -45,7 +44,7 @@ export default function Blog({
   inventory,
 }: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
-    <Layout nav={nav}>
+    <Layout>
       <div className="">
         {inventory.map((item) => (
           <div key={item.title}>

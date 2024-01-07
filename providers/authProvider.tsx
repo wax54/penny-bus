@@ -16,6 +16,11 @@ import {
 type Loadable<DataType> =
   | {
       data?: DataType | undefined;
+      loading: false;
+      error?: string;
+    }
+  | {
+      data?: DataType | undefined;
       loading: true;
       error?: string;
     }
@@ -32,15 +37,19 @@ type Loadable<DataType> =
 
 const authContext = createContext<{
   userPermissions?: Loadable<userPermissions>;
-  login?: (input: UserLoginParams) => Promise<{ success: boolean }>;
-  signup?: (input: UserCreateParams) => Promise<{ success: boolean }>;
+  login?: (
+    input: UserLoginParams
+  ) => Promise<{ success: boolean; error?: string }>;
+  signup?: (
+    input: UserCreateParams
+  ) => Promise<{ success: boolean; error?: string }>;
   logout?: () => Promise<void>;
 }>({});
 
 export const AuthProvider = ({ children }: { children: JSX.Element }) => {
   const [userPermissions, setUserPermissions] = useState<
     Loadable<userPermissions>
-  >({ loading: true });
+  >({ loading: false });
   useEffect(() => {
     const attemptRefresh = async () => {
       const token = window.localStorage.getItem("auth");
@@ -63,6 +72,9 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
         });
         //call login api
         const data = await AuthApi.login(input);
+        if (data.success === false) {
+          throw Error(data.message);
+        }
         // store token in local storage
         window.localStorage.setItem("auth", data.token);
         // get user data from endpoint
@@ -77,7 +89,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
           loading: false,
           error: e.message,
         });
-        return { success: false };
+        return { success: false, error: e.message };
       }
     },
     [setUserPermissions]
@@ -96,8 +108,8 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
           data: { admin: true, loggedIn: true, user },
         });
         return { success: true };
-      } catch {
-        return { success: false };
+      } catch (e: any) {
+        return { success: false, error: e.message };
       }
     },
     [setUserPermissions]

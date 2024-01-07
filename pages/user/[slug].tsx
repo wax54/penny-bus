@@ -1,20 +1,11 @@
-import {
-  ChangeEvent,
-  ChangeEventHandler,
-  EventHandler,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { Layout } from "../../components/Layout";
-import { nav } from "../../constants/nav";
 import { styles } from "../../constants/styles";
 import {
   GetStaticPathsResult,
   GetStaticPropsContext,
   InferGetStaticPropsType,
 } from "next";
-import { AuthApi } from "../../api";
 import { UserCreateParams, UserLoginParams } from "../../types/user";
 import { useRouter } from "next/router";
 import { authRedirects } from "../../utils/auth";
@@ -111,16 +102,20 @@ export const Auth = ({
       const manipulation = pageSlug === "login" ? login : signup;
       manipulation
         ? manipulation({ ...user })
-            .then((data: any) => {
-              setLoading(false);
-              console.log(data);
-              if (data.success) {
-                router.push("/admin/blog");
-              } else {
+            .then(
+              (
+                data: { success: true } | { success: false; error?: string }
+              ) => {
+                setLoading(false);
                 console.log(data);
-                pushMessage(data.error);
+                if (data.success) {
+                  router.push("/admin/blog");
+                } else {
+                  console.log(data);
+                  pushMessage({ message: data.error as string, type: "error" });
+                }
               }
-            })
+            )
             .catch((e) => {
               console.log(e);
               setLoading(false);
@@ -130,9 +125,12 @@ export const Auth = ({
     },
     [pageSlug, setLoading, router, login, signup]
   );
+
   if (pageSlug === "logout") {
-    logout?.();
-    router.push("/");
+    useEffect(() => {
+      logout?.();
+      router.push("/");
+    }, [logout, router]);
     return null;
   }
   const { title, password, username, name, CTA, secondaryCTA } = getText({
@@ -146,7 +144,7 @@ export const Auth = ({
     }));
   };
   return (
-    <Layout nav={nav} style={styles}>
+    <Layout style={styles}>
       <div>
         <form className="flex flex-col items-center">
           <h1>{title}</h1>
@@ -155,7 +153,7 @@ export const Auth = ({
               id="username"
               name="username"
               disabled={loading}
-              className="rounded p-4 w-[500px] "
+              className="rounded p-4 w-[500px] sm:w-[250px] "
               {...username}
               value={form.username}
               onChange={handleChange}
@@ -165,7 +163,7 @@ export const Auth = ({
             <Input
               type="password"
               name="password"
-              className="p-4 w-[500px] rounded"
+              className="p-4 rounded w-[500px] sm:w-[250px]"
               {...password}
               disabled={loading}
               value={form.password}
@@ -176,7 +174,7 @@ export const Auth = ({
             <Input
               type="name"
               name="name"
-              className=" p-4 w-[500px] rounded"
+              className=" p-4 rounded w-[500px] sm:w-[250px]"
               {...name}
               disabled={loading}
               value={form.name}
@@ -187,18 +185,21 @@ export const Auth = ({
           <button
             type="submit"
             disabled={loading}
-            className="mt-7 rounded-xl p-4 bg-primary hover:bg-secondary w-[500px]"
+            className="mt-7 rounded-xl p-4 bg-primary hover:bg-secondary disabled:bg-accent/20  w-[500px] sm:w-[250px]"
             onClick={() => gainAccess(form)}
           >
             {CTA.text}
           </button>
           {secondaryCTA ? (
-            <a
-              className="text-center rounded-xl bg-accent my-7 p-4 w-[500px] hover:bg-secondary"
-              href={secondaryCTA.href}
+            <button
+              className="text-center rounded-xl bg-accent my-7 p-4 hover:bg-secondary disabled:bg-accent/20 w-[500px] sm:w-[250px]"
+              disabled={loading}
+              onClick={() => {
+                router.push(secondaryCTA.href);
+              }}
             >
               {secondaryCTA.text}
-            </a>
+            </button>
           ) : null}
         </form>
       </div>

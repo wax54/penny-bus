@@ -6,7 +6,6 @@ import {
   InferGetStaticPropsType,
 } from "next";
 import { Layout } from "../../components/Layout";
-import { nav } from "../../constants/nav";
 import { BlogData, PARTITIONS } from "../../types";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import { styles } from "../../constants/styles";
@@ -95,7 +94,7 @@ export default function Blog({
     return <div>LOADING!</div>;
   }
   return (
-    <Layout nav={nav} style={styles}>
+    <Layout style={styles}>
       <BlogPost blog={blog} />
     </Layout>
   );

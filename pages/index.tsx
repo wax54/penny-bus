@@ -1,11 +1,10 @@
 import { GetStaticProps, InferGetStaticPropsType } from "next";
-import { nav } from "../constants/nav";
 import { Layout } from "../components/Layout";
 
 export default function Home({}: InferGetStaticPropsType<GetStaticProps>) {
 
   return (
-    <Layout nav={nav}>
+    <Layout >
       <div id="content">
         <div id="content" className="text-center text-white">
           <h3>Our Mission Statement</h3>

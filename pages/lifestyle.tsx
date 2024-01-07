@@ -1,6 +1,5 @@
 import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { Layout } from "../components/Layout";
-import { nav } from "../constants/nav";
 import { useRef } from "react";
 
 const pins = ["/blue_pin.png", "/red_pin.png", "/bl_pin.png", "/yl_pin.png"];
@@ -48,7 +47,7 @@ export default function Lifestyle({
   admin,
 }: InferGetStaticPropsType<typeof getServerSideProps> & { admin?: boolean }) {
   return (
-    <Layout nav={nav}>
+    <Layout >
       <h2
         style={{
           color: "white",

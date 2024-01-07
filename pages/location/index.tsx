@@ -1,5 +1,4 @@
 import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
-import { nav } from "../../constants/nav";
 import { useState } from "react";
 import { LocationData, PARTITIONS } from "../../types";
 import { Api } from "../../api";
@@ -41,7 +40,7 @@ export default function Location({
   };
 
   return (
-    <Layout nav={nav}>
+    <Layout>
       <h2
         style={{
           color: "white",

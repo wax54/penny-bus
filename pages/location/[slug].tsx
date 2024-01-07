@@ -6,7 +6,6 @@ import {
   InferGetStaticPropsType,
 } from "next";
 import { Layout } from "../../components/Layout";
-import { nav } from "../../constants/nav";
 import { LocationData, PARTITIONS } from "../../types";
 import { styles } from "../../constants/styles";
 import { Api } from "../../api";
@@ -37,7 +36,7 @@ export default function Location({
     return <div>LOADING!</div>;
   }
   return (
-    <Layout nav={nav} style={styles}>
+    <Layout style={styles}>
       <LocationPost location={location} />
     </Layout>
   );

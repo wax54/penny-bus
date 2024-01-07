@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { NavItem } from "../constants/nav";
 import { Nav } from "./Nav";
 import { authRedirects } from "../utils/auth";
 import { useRouter } from "next/router";
-import { userPermissions } from "../types/user";
 import { usePermissions } from "../providers/authProvider";
 
-export const Header = ({ nav }: { nav: NavItem[] }) => {
+export const Header = () => {
   const userPermissions = usePermissions();
   const router = useRouter();
   const loginOptions = userPermissions?.loading
@@ -44,7 +42,7 @@ export const Header = ({ nav }: { nav: NavItem[] }) => {
           {loginOptions.text}
         </Link>
       </div>
-      <Nav nav={nav} />
+      <Nav />
     </div>
   );
 };

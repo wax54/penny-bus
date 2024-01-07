@@ -5,8 +5,15 @@ import {
   useContext,
   useState,
 } from "react";
+import { FromConstObject } from "../types";
 
-type Message = { message: string; type: "error" | "info" };
+export const MESSAGE_TYPES = {
+  ERROR: 'error',
+  INFO: 'info',
+} as const
+type MessageType = FromConstObject<typeof MESSAGE_TYPES>
+
+type Message = { message: string; type: MessageType };
 const messagesContext = createContext<{
   markRead: (message: string) => void;
   push: (message: Message) => void;
@@ -35,6 +42,7 @@ export const MessageProvider = ({ children }: ReactElement["props"]) => {
     },
     [setMessages]
   );
+  console.log(messages)
   return (
     <messagesContext.Provider
       value={{
@@ -57,7 +65,6 @@ const Notification = () => {
       : currentMessage?.type === "error"
       ? "bg-secondary"
       : "";
-
   return currentMessage ? (
     <div className={`absolute top-4 right-4 p-4 ${bgClass}`}>
       <button
