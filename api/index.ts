@@ -178,7 +178,7 @@ export const AuthApi = {
     );
     try {
       const res = await fetch(getUserUrl, {
-        method: "GET",
+        method: "POST",
         body: JSON.stringify({ token }),
       });
       const body = await res.json();

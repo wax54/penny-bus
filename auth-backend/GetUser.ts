@@ -27,7 +27,7 @@ export const handler: Handler = async (
     const user = await User.get(token);
 
     return {
-      statusCode: 400,
+      statusCode: 200,
       body: JSON.stringify({
         success: true,
         user,

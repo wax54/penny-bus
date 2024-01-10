@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
     const attemptRefresh = async () => {
       const token = window.localStorage.getItem("auth");
       if (token) {
-        const user = await AuthApi.get(token);
+        const { user } = await AuthApi.get(token);
 
         setUserPermissions({
           loading: false,
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
         // store token in local storage
         window.localStorage.setItem("auth", data.token);
         // get user data from endpoint
-        const user = await AuthApi.get(data.token);
+        const { user } = await AuthApi.get(data.token);
         setUserPermissions({
           loading: false,
           data: { loggedIn: true, user },

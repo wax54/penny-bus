@@ -15,7 +15,7 @@ export const User = {
       type: PARTITIONS.USER,
       id,
       createdAt: new Date().getTime(),
-      admin: false
+      admin: false,
     };
     await authTable.user.create(user);
     return user;
@@ -62,7 +62,7 @@ export const User = {
       if (!user) {
         throw Error("User not found");
       }
-      return { user, hash: undefined };
+      return { ...user, hash: undefined };
     }
   },
 };
