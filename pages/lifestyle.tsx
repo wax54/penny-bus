@@ -3,7 +3,9 @@ import { Layout } from "../components/Layout";
 import { useRef } from "react";
 import { IMAGE_PATH, SITE_URL } from "../config";
 
-const pins = ["/blue_pin.png", "/red_pin.png", "/bl_pin.png", "/yl_pin.png"];
+const pins = ["blue_pin.png", "red_pin.png", "bl_pin.png", "yl_pin.png"].map(
+  (imageFile) => SITE_URL + "/" + IMAGE_PATH + "/" + imageFile
+);
 
 const LifestyleArticle = ({
   article,
@@ -11,7 +13,7 @@ const LifestyleArticle = ({
   article: { img: string; title: string; body: string };
 }) => {
   const offset = useRef(Math.floor(Math.random() * 60 - 30));
-  const pinXOffset = useRef(Math.floor(Math.random() * 250));
+  const pinXOffset = useRef(Math.floor(Math.random() * 150 + 50));
   const pinYOffset = useRef(Math.floor(Math.random() * 50 - 25));
   const pinNumber = useRef(Math.floor(Math.random() * 4));
   return article ? (
@@ -63,7 +65,7 @@ export default function Lifestyle({
       <div
         className="h-[full] bg-repeat "
         style={{
-          backgroundImage: "url(/img/repeating-lifestyle.jpg)",
+          backgroundImage: `url(${SITE_URL}/${IMAGE_PATH}/repeating-lifestyle.jpg)`,
         }}
       >
         {articles.map((article) => (
