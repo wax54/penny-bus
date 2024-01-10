@@ -1,7 +1,8 @@
 import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { Layout } from "../components/Layout";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { IMAGE_PATH, SITE_URL } from "../config";
+import { useBreakPoint } from "../hooks";
 
 const pins = ["blue_pin.png", "red_pin.png", "bl_pin.png", "yl_pin.png"].map(
   (imageFile) => SITE_URL + "/" + IMAGE_PATH + "/" + imageFile
@@ -12,23 +13,42 @@ const LifestyleArticle = ({
 }: {
   article: { img: string; title: string; body: string };
 }) => {
-  const offset = useRef(Math.floor(Math.random() * 60 - 30));
-  const pinXOffset = useRef(Math.floor(Math.random() * 150 + 50));
-  const pinYOffset = useRef(Math.floor(Math.random() * 50 - 25));
+  const breakPoint = useBreakPoint();
+  const { offset, pinXOffset, pinYOffset } = useMemo(() => {
+    return {
+      offset: Math.floor(
+        Math.random() *
+          (breakPoint === "sm" || breakPoint === "md"
+            ? 5
+            : breakPoint === "lg"
+            ? 10
+            : 40) -
+          (breakPoint === "sm" || breakPoint === "md"
+            ? 2
+            : breakPoint === "lg"
+            ? 5
+            : 20)
+      ),
+      pinXOffset: Math.floor(Math.random() * 100 + 50),
+      pinYOffset: Math.floor(
+        Math.random() * (Math.random() < 0.3 ? 225 : 50) - 25
+      ),
+    };
+  }, [breakPoint]);
   const pinNumber = useRef(Math.floor(Math.random() * 4));
   return article ? (
     <div className="m-10">
       <div
-        className={` m-auto p-5 w-full md:w-[300px] bg-white rounded-xl `}
+        className={` m-auto p-5 w-[300px] md:w-[600px] bg-white rounded-xl `}
         style={{
-          translate: `calc(${offset.current}vw )`,
+          translate: `calc(${offset}vw )`,
         }}
       >
         <img
           src={pins[pinNumber.current]}
           alt="pin"
           style={{
-            translate: `${pinXOffset.current}px ${pinYOffset.current}px `,
+            translate: `${pinXOffset}px ${pinYOffset}px `,
           }}
           className="rounded-full border-grey border-2"
           width={50}
