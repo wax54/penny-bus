@@ -17,8 +17,8 @@ export const nav = [
   },
   {
     text: "Gallery",
-    href: "/videos",
-    isActive: true,
+    href: "/gallery",
+    isActive: false,
   },
   {
     text: "Lifestyle",
@@ -28,7 +28,7 @@ export const nav = [
   {
     text: "Shop",
     href: "/shop",
-    isActive: true,
+    isActive: false,
   },
   {
     text: "Snapshots",
@@ -51,7 +51,7 @@ export const useNav = () => {
   const navItems = useMemo(() => {
     return [
       ...nav,
-      ...(userPermissions?.data?.admin
+      ...(userPermissions?.data?.user?.admin
         ? [
             { href: "/admin/blog", text: "Blog management", isActive: true },
             {
@@ -61,11 +61,12 @@ export const useNav = () => {
             },
           ]
         : []),
-    ].map((item) =>
-      router.isReady
-        ? { ...item, isCurrPage: isCurrentPage(item.href) }
-        : { ...item, isCurrPage: false }
-    );
-  }, [userPermissions?.data?.admin, router, router.isReady, router.pathname]);
+    ];
+  }, [
+    userPermissions?.data?.user?.admin,
+    router,
+    router.isReady,
+    router.pathname,
+  ]);
   return navItems;
 };

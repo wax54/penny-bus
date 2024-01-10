@@ -67,7 +67,7 @@ export default function Blog({
                 <li key={blog.slug} style={{ margin: "auto" }} className="flex">
                   <a
                     href={`./blog/${blog.slug}`}
-                    className="flex-1 rounded-xl decoration-none bg-primary text-text-primary border-b-[2px] border-transparent hover:border-white hover:bg-secondary   hover:text-textSecondary cursor-pointer flex justify-between"
+                    className="flex-1 rounded-xl decoration-none bg-primary text-textPrimary border-b-[2px] border-transparent hover:border-white hover:bg-secondary hover:text-textPrimary cursor-pointer flex justify-between"
                     style={{
                       textTransform: "capitalize",
                       padding: 10,

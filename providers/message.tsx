@@ -42,7 +42,6 @@ export const MessageProvider = ({ children }: ReactElement["props"]) => {
     },
     [setMessages]
   );
-  console.log(messages)
   return (
     <messagesContext.Provider
       value={{

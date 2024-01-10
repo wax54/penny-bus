@@ -12,7 +12,6 @@ import { Api } from "../../api";
 import { NEW_LOCATION_SLUG } from "../../constants/config";
 
 export function LocationPost({ location }: { location: LocationData }) {
-  console.log(location);
   if (!location) return <div>LOADING</div>;
   return (
     <>
@@ -70,7 +69,6 @@ export async function getStaticProps(
   if (admin && slug === NEW_LOCATION_SLUG) {
     return { props: { slug, admin } };
   }
-  console.log(slug);
   const { success, body, error } = await Api.get<LocationData>({
     type: PARTITIONS.LOCATION,
     slug,

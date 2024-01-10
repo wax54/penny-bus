@@ -168,7 +168,11 @@ resources:
                 OriginAccessIdentity: ""
               OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
             - Id: image-bucket
-              DomainName: !Join ["", ["${self:custom.imageBucketName}", ".s3.amazonaws.com"]]
+              DomainName:
+                !Join [
+                  "",
+                  ["${self:custom.imageBucketName}", ".s3.amazonaws.com"],
+                ]
               S3OriginConfig:
                 OriginAccessIdentity: ""
               OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
@@ -191,13 +195,17 @@ resources:
             - Id: image-backend
               CustomOriginConfig:
                 OriginProtocolPolicy: https-only
-              DomainName: { "Fn::Join": [
+              DomainName:
+                {
+                  "Fn::Join":
+                    [
                       "",
                       [
                         "${self:custom.imageApi}",
                         ".execute-api.${self:provider.region}.amazonaws.com",
                       ],
-                    ] }
+                    ],
+                }
               OriginPath: "/${self:custom.stage}"
           Aliases:
             - ${self:custom.domain}
@@ -215,6 +223,16 @@ resources:
             TargetOriginId: render
             ViewerProtocolPolicy: redirect-to-https
           CacheBehaviors:
+            - AllowedMethods: ["GET", "HEAD", "OPTIONS"]
+              CachedMethods: ["HEAD", "GET"]
+              TargetOriginId: render
+              MinTTL: "0"
+              MaxTTL: "0"
+              DefaultTTL: "0"
+              ForwardedValues:
+                QueryString: false
+              ViewerProtocolPolicy: redirect-to-https
+              PathPattern: /_next/data/*
             - AllowedMethods: ["GET", "HEAD", "OPTIONS"]
               CachedMethods: ["HEAD", "GET"]
               TargetOriginId: bucket

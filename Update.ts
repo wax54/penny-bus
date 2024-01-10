@@ -35,13 +35,10 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    console.log({ event });
     const body = getBody(event);
     const blogUpdates = body.blog;
     if (blogUpdates) {
-      console.log({ blogUpdates });
       const a = await PutObjectToDynamo(blogUpdates);
-      console.log({ a });
     }
     return {
       statusCode: 200,

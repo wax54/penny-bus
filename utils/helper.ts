@@ -1,5 +1,5 @@
-export const isCurrentPage = (page: string) => {
-  if (global?.window?.location) {
-    return global.window.location.pathname.includes(page);
+export const isCurrentPage = (testPage: string, currentPage: string) => {
+  if (currentPage && testPage) {
+    return currentPage === testPage;
   } else return false;
 };

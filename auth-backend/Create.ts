@@ -26,9 +26,10 @@ export const handler: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const body = getBody(event);
-    const { id } = await User.create(body);
+    const { id, admin } = await User.create(body);
     const token = await Token.create({
       id,
+      admin,
     });
     return {
       statusCode: 200,

@@ -41,6 +41,8 @@ export type UserGSI1KeyComponents = {
 export type TokenData = TokenKeyComponents & {
   createdAt: number;
   valid: boolean;
+  admin: boolean;
+  deleteDate: string;
 };
 
 export type UserData = UserKeyComponents &
@@ -53,6 +55,7 @@ export type UserData = UserKeyComponents &
     address?: string;
     tz?: string;
     createdAt: number;
+    admin: boolean;
   };
 
 export type UserDBData = UserKeys & UserData;

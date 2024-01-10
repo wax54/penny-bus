@@ -28,13 +28,14 @@ module.exports = {
     extend: {
       colors: {
         textPrimary: "#000000",
-        textSecondary: "#FFFFFF",
-        textAccent: "#FFFF00",
-        accent: "#EEFFEE",
-        secondary: "#EE9999",
+        textSecondary: "#FFFF00",
+        textAccent: "#FFFFFF",
+        accent: "#EE9999",
+        secondary: "#EEFFEE",
         primary: "#99EE99",
+        disabled: "#888888",
         secondaryAccent: "#EEFFEE",
-        offWhite: "rgba(0,0,0,0.3)",
+        white: "#FFFFFF",
       },
 
       keyframes: {

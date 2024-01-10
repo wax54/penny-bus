@@ -12,7 +12,6 @@ export type UserCreateParams = {
 };
 
 export type userPermissions = {
-  admin?: boolean;
   loggedIn?: boolean;
   user?: UserData;
 };

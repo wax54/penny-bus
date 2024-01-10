@@ -4,3 +4,4 @@ if (!SECRET_JWT_HASH) {
 }
 export const SALT_ROUNDS = 15;
 export const TOO_OLD_TO_REFRESH_DAYS = 120;
+export const TOKEN_HARD_EXPIRE = 365;

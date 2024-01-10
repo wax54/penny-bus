@@ -31,7 +31,6 @@ export const UpdateBlog = ({
   blog,
   slug,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  console.log("blog", slug);
   const router = useRouter();
   const blogRef = useRef(
     blog
@@ -58,7 +57,6 @@ export const UpdateBlog = ({
       JSON.stringify(val) ===
       JSON.stringify(blogRef.current[key as keyof typeof currBlog])
   );
-  console.log({ inSync });
   const updateBlog = useCallback(
     (updatedBlog: BlogData & BlogKeyComponents) => {
       setLoading(true);
@@ -85,14 +83,13 @@ export const UpdateBlog = ({
     manipulation({ type: currBlog.type, slug: currBlog.slug })
       .then((res) => {
         setLoading(false);
-        console.log("DONE", res);
         setTimeout(() => router.push("/admin/blog"), 200);
       })
       .catch((e) => setLoading(false));
-  }, [slug, setLoading, router]);
+  }, [slug, setLoading, router, currBlog.slug, currBlog.type]);
 
   return (
-    <div className="bg-offWhite flex flex-column sm:flex-row">
+    <div className="bg-white flex flex-column sm:flex-row">
       <Link href="/admin/blog">Blog list</Link>
       <div className="p-4 flex-1">
         <div className="h-[20px]">
@@ -244,7 +241,9 @@ export const UpdateBlog = ({
                   );
                   value = value.replace(
                     `{{${image.name}}`,
-                    `![test](${process.env.NEXT_PUBLIC_SITE_URL}/images/${image.path ?? ""})`
+                    `![test](${process.env.NEXT_PUBLIC_SITE_URL}/images/${
+                      image.path ?? ""
+                    })`
                   );
                 }
               }
@@ -277,7 +276,9 @@ export const UpdateBlog = ({
         {currBlog?.locationSlug && locations?.data
           ? locations.data
               .find((l) => l.slug === currBlog.locationSlug)
-            ?.images?.map((image) => <ImagePreview key={image.name} image={image} />)
+              ?.images?.map((image) => (
+                <ImagePreview key={image.name} image={image} />
+              ))
           : null}
         <div>
           <input
@@ -289,7 +290,6 @@ export const UpdateBlog = ({
             checked={currBlog.isHidden ? true : false}
             onChange={(evt) => {
               const { checked, name } = evt.target;
-              console.log({ checked });
               setCurrBlog((blog) => ({ ...blog, [name]: checked }));
             }}
           />

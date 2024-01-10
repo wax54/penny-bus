@@ -1,10 +1,10 @@
 import JWT from "jsonwebtoken";
-import { SECRET_JWT_HASH, TOO_OLD_TO_REFRESH_DAYS } from "../config";
+import { SECRET_JWT_HASH, TOKEN_HARD_EXPIRE, TOO_OLD_TO_REFRESH_DAYS } from "../config";
 import { PARTITIONS, authTable } from "./authTable";
 import { randomUUID } from "crypto";
 import { RefreshUserInput } from "../Refresh";
 import { TokenData } from "../../types";
-type UserTokenProps = { id: string; tokenHash: string };
+type UserTokenProps = { id: string; tokenHash: string; admin: boolean };
 export const Token = {
   encode: (data: UserTokenProps): string =>
     JWT.sign(data, SECRET_JWT_HASH, { expiresIn: "7 days" }),
@@ -12,16 +12,19 @@ export const Token = {
     return JWT.verify(token, SECRET_JWT_HASH) as UserTokenProps;
   },
 
-  create: async ({ id }: { id: string }) => {
+  create: async ({ id, admin }: { id: string; admin: boolean }) => {
     const tokenHash = randomUUID();
+    const createdAt = new Date().getTime(); 
     await authTable.token.create({
       type: PARTITIONS.TOKEN,
       tokenHash,
       id,
+      admin: admin,
       valid: true,
-      createdAt: new Date().getTime(),
+      createdAt,
+      deleteDate: new Date(createdAt + TOKEN_HARD_EXPIRE * 24 * 60 * 60 * 1000).toISOString() // days * 24 hours * 60 mins * 60 seconds * 1000 ms
     });
-    const token = Token.encode({ id, tokenHash });
+    const token = Token.encode({ id, tokenHash, admin });
     return token;
   },
   validate: async (oldToken: RefreshUserInput["token"]) => {

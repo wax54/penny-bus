@@ -38,8 +38,6 @@ export const UpdateLocation = ({
   location,
   slug,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  console.log("location", slug);
-  console.log("location", location);
   const router = useRouter();
   const locationRef = useRef(
     location
@@ -105,7 +103,6 @@ export const UpdateLocation = ({
         console.log(e);
       }
     };
-    console.log("start");
 
     _run();
   }, [currLocation?.images]);
@@ -115,10 +112,8 @@ export const UpdateLocation = ({
       JSON.stringify(val) ===
       JSON.stringify(locationRef.current[key as keyof typeof currLocation])
   );
-  console.log({ inSync });
   const updateLocation = useCallback(
     (updatedLocation: Partial<LocationData> & LocationKeyComponents) => {
-      console.log({ updatedLocation });
       if (!updatedLocation.type) {
         throw Error("missing type!");
       } else if (!updatedLocation.slug) {
@@ -159,13 +154,12 @@ export const UpdateLocation = ({
     manipulation({ type: currLocation.type, slug: currLocation.slug })
       .then((res) => {
         setLoading(false);
-        console.log("DONE", res);
         setTimeout(() => router.push("/admin/location"), 200);
       })
       .catch((e) => setLoading(false));
-  }, [slug, setLoading, router]);
+  }, [slug, setLoading, router, currLocation.slug, currLocation.type]);
   return (
-    <div className="bg-offWhite flex flex-column sm:flex-row">
+    <div className="bg-white flex flex-column sm:flex-row">
       <Link href="/admin/location">Location list</Link>
       <div className="p-4 flex-1">
         <div className="h-[20px]">
@@ -274,7 +268,6 @@ export const UpdateLocation = ({
           onChange={(evt) => {
             const { value, name } = evt.target;
             const [lat = "", lng = ""] = value.replace(/\s/g, "").split(",");
-            console.log({ lat, lng });
             setCurrLocation((location) => ({
               ...location,
               [name]: {
@@ -361,7 +354,6 @@ export const UpdateLocation = ({
             disabled={loading}
             onChange={(evt) => {
               const { files, name } = evt.target;
-              console.log({ files });
               if (!files) {
                 alert("No files in upload");
                 return;
@@ -420,7 +412,6 @@ export const UpdateLocation = ({
                   value={image.ref ?? image.name}
                   onChange={(evt) => {
                     const { value } = evt.target;
-                    console.log({ value });
                     setCurrLocation((location) => ({
                       ...location,
                       images: currLocation.images?.map((i) => {
@@ -450,7 +441,6 @@ export const UpdateLocation = ({
             checked={currLocation.isHidden ? true : false}
             onChange={(evt) => {
               const { checked, name } = evt.target;
-              console.log({ checked });
               setCurrLocation((location) => ({ ...location, [name]: checked }));
             }}
           />

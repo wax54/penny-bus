@@ -1,6 +1,7 @@
 import { GetStaticPropsContext, InferGetStaticPropsType } from "next";
 import { Layout } from "../components/Layout";
 import { useRef } from "react";
+import { IMAGE_PATH, SITE_URL } from "../config";
 
 const pins = ["/blue_pin.png", "/red_pin.png", "/bl_pin.png", "/yl_pin.png"];
 
@@ -47,7 +48,7 @@ export default function Lifestyle({
   admin,
 }: InferGetStaticPropsType<typeof getServerSideProps> & { admin?: boolean }) {
   return (
-    <Layout >
+    <Layout>
       <h2
         style={{
           color: "white",
@@ -74,11 +75,11 @@ export default function Lifestyle({
 }
 
 const fakeContent = {
-  img: "/img/penny-bus.jpg",
+  img: SITE_URL + "/" + IMAGE_PATH + "/penny-bus.jpg",
   title: "Test Content",
   body: "To the test of time there is nothing to do. You haev earned my respect Bradward Boimler. I will let your captain know. ",
 };
-const fakeContents = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((g) => ({
+const fakeContents = new Array(10).fill(undefined).map((a) => ({
   ...fakeContent,
 }));
 export async function getServerSideProps({}: GetStaticPropsContext) {

@@ -170,6 +170,9 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
+        TimeToLiveSpecification:
+          AttributeName: deleteDate
+          Enabled: true
         # StreamSpecification:
         #   StreamViewType: NEW_AND_OLD_IMAGES
 

@@ -50,13 +50,9 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    console.log({ event });
     const body = getBody(event);
     if (body) {
-      console.log({ body });
-
-      const a = await busTable.update(body);
-      console.log({ a });
+      await busTable.update(body);
     }
     return {
       statusCode: 200,

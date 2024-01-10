@@ -37,7 +37,6 @@ export const Api = {
       }
     | { success: false; error: string; body?: undefined }
   > => {
-    console.log({ type });
     const getURL = new URL(`/api/${type}`, process.env.NEXT_PUBLIC_SITE_URL);
     try {
       const res = await fetch(getURL, {

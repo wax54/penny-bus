@@ -15,6 +15,7 @@ export const User = {
       type: PARTITIONS.USER,
       id,
       createdAt: new Date().getTime(),
+      admin: false
     };
     await authTable.user.create(user);
     return user;

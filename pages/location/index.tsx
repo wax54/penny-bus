@@ -111,7 +111,6 @@ export async function getServerSideProps({}: GetStaticPropsContext) {
   const response = await Api.getAll<LocationData>({
     type: PARTITIONS.LOCATION,
   });
-  console.log("repsonse");
   return {
     props: {
       locations: response.body?.items ?? [],

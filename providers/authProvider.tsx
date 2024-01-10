@@ -5,8 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { LocationData, PARTITIONS, UserData } from "../types";
-import { Api, AuthApi } from "../api";
+import { AuthApi } from "../api";
 import {
   UserCreateParams,
   UserLoginParams,
@@ -58,7 +57,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
 
         setUserPermissions({
           loading: false,
-          data: { admin: true, loggedIn: true, user },
+          data: { loggedIn: true, user },
         });
       }
     };
@@ -81,7 +80,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
         const user = await AuthApi.get(data.token);
         setUserPermissions({
           loading: false,
-          data: { admin: true, loggedIn: true, user },
+          data: { loggedIn: true, user },
         });
         return { success: true };
       } catch (e: any) {
@@ -105,7 +104,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
         const user = await AuthApi.get(data.token);
         setUserPermissions({
           loading: false,
-          data: { admin: true, loggedIn: true, user },
+          data: { loggedIn: true, user },
         });
         return { success: true };
       } catch (e: any) {
@@ -120,7 +119,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
     window.localStorage.removeItem("auth");
     setUserPermissions({
       loading: false,
-      data: { admin: false, loggedIn: false, user: undefined },
+      data: { loggedIn: false, user: undefined },
       error: undefined,
     });
   }, [setUserPermissions]);

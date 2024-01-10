@@ -13,7 +13,6 @@ import { Api } from "../../api";
 import { NEW_BLOG_SLUG } from "../../constants/config";
 
 export function BlogPost({ blog }: { blog: BlogData }) {
-  console.log(blog);
   function DateStamp({
     arrival,
     departure,
@@ -126,7 +125,6 @@ export async function getStaticProps(
   if (admin && slug === NEW_BLOG_SLUG) {
     return { props: { slug, admin } };
   }
-  console.log(slug);
   const { success, body, error } = await Api.get<BlogData>({
     type: PARTITIONS.BLOG,
     slug,

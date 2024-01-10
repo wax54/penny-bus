@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import { authRedirects } from "../../utils/auth";
 import { usePushMessage } from "../../providers";
 import { useAuthTools, usePermissions } from "../../providers/authProvider";
+import { Button } from "../../components/Button";
 type UserFormValues = UserCreateParams & UserLoginParams;
 
 type GetTextReturnType = {
@@ -24,7 +25,7 @@ type GetTextReturnType = {
 const getText = ({
   pageSlug,
 }: {
-  pageSlug: "login" | "create";
+  pageSlug: "create" | "login";
 }): GetTextReturnType => {
   const defaultName = { label: "Name", placeholder: "Alex Decanter" };
   const defaultText = {
@@ -72,10 +73,14 @@ const Input = ({
   const id = props.id ?? props.name;
   return (
     <div className="my-3 flex flex-col items-start ">
-      <label className="mb-1 text-accent" htmlFor={id}>
+      <label className="mb-1 text-textPrimary" htmlFor={id}>
         {label}
       </label>
-      <input {...props} id={id} />
+      <input
+        className=" p-4 rounded w-[250px] md:w-[500px]"
+        {...props}
+        id={id}
+      />
       <div> {error}</div>
     </div>
   );
@@ -84,7 +89,7 @@ const Input = ({
 export const Auth = ({
   pageSlug,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
-  const { login, signup, logout } = useAuthTools();
+  const { login, signup } = useAuthTools();
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -107,11 +112,9 @@ export const Auth = ({
                 data: { success: true } | { success: false; error?: string }
               ) => {
                 setLoading(false);
-                console.log(data);
                 if (data.success) {
                   router.push("/admin/blog");
                 } else {
-                  console.log(data);
                   pushMessage({ message: data.error as string, type: "error" });
                 }
               }
@@ -125,13 +128,8 @@ export const Auth = ({
     },
     [pageSlug, setLoading, router, login, signup]
   );
-
-  if (pageSlug === "logout") {
-    useEffect(() => {
-      logout?.();
-      router.push("/");
-    }, [logout, router]);
-    return null;
+  if (!pageSlug) {
+    return <div> LOADING...</div>;
   }
   const { title, password, username, name, CTA, secondaryCTA } = getText({
     pageSlug,
@@ -153,7 +151,6 @@ export const Auth = ({
               id="username"
               name="username"
               disabled={loading}
-              className="rounded p-4 w-[500px] sm:w-[250px] "
               {...username}
               value={form.username}
               onChange={handleChange}
@@ -163,7 +160,6 @@ export const Auth = ({
             <Input
               type="password"
               name="password"
-              className="p-4 rounded w-[500px] sm:w-[250px]"
               {...password}
               disabled={loading}
               value={form.password}
@@ -174,7 +170,6 @@ export const Auth = ({
             <Input
               type="name"
               name="name"
-              className=" p-4 rounded w-[500px] sm:w-[250px]"
               {...name}
               disabled={loading}
               value={form.name}
@@ -182,24 +177,24 @@ export const Auth = ({
             />
           ) : null}
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="mt-7 rounded-xl p-4 bg-primary hover:bg-secondary disabled:bg-accent/20  w-[500px] sm:w-[250px]"
+            btnType="primary"
             onClick={() => gainAccess(form)}
           >
             {CTA.text}
-          </button>
+          </Button>
           {secondaryCTA ? (
-            <button
-              className="text-center rounded-xl bg-accent my-7 p-4 hover:bg-secondary disabled:bg-accent/20 w-[500px] sm:w-[250px]"
+            <Button
               disabled={loading}
+              btnType="secondary"
               onClick={() => {
                 router.push(secondaryCTA.href);
               }}
             >
               {secondaryCTA.text}
-            </button>
+            </Button>
           ) : null}
         </form>
       </div>
@@ -221,9 +216,9 @@ export const getStaticProps = ({
       redirect: { destination: "/", permanent: false },
     };
   }
-  if (["login", "create", "logout"].includes(params?.slug)) {
+  if (["login", "create"].includes(params?.slug)) {
     return {
-      props: { pageSlug: params.slug as "login" | "create" | "logout" },
+      props: { pageSlug: params.slug as "login" | "create" },
     };
   } else {
     return {
