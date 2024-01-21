@@ -32,6 +32,11 @@ export const PARTITIONS = {
 } as const;
 export type PartitionName = (typeof PARTITIONS)[keyof typeof PARTITIONS];
 
+export const ORIGINS = {
+  PENNY: "https://pennybusproject.com",
+} as const;
+export type OriginName = (typeof ORIGINS)[keyof typeof ORIGINS];
+
 const getTableName = (table: TableName): string => {
   let tableName;
   if (table === TABLES.AUTH) {

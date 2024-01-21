@@ -8,10 +8,10 @@ import {
 import { FromConstObject } from "../types";
 
 export const MESSAGE_TYPES = {
-  ERROR: 'error',
-  INFO: 'info',
-} as const
-type MessageType = FromConstObject<typeof MESSAGE_TYPES>
+  ERROR: "error",
+  INFO: "info",
+} as const;
+type MessageType = FromConstObject<typeof MESSAGE_TYPES>;
 
 type Message = { message: string; type: MessageType };
 const messagesContext = createContext<{
@@ -60,9 +60,9 @@ const Notification = () => {
   const { currentMessage, markRead } = useContext(messagesContext);
   const bgClass =
     currentMessage?.type === "info"
-      ? "bg-primary"
+      ? "bg-primary text-textPrimary"
       : currentMessage?.type === "error"
-      ? "bg-secondary"
+      ? "bg-warning text-textWarning"
       : "";
   return currentMessage ? (
     <div className={`absolute top-4 right-4 p-4 ${bgClass}`}>

@@ -17,9 +17,14 @@ export default function Home({}: InferGetStaticPropsType<GetStaticProps>) {
         </div>
         <div
           id="main-image"
-          className="text-center text-textPrimary col-span-12 md:col-span-8"
+          className="text-center text-textPrimary col-span-12 md:col-span-8 lg:px-[10px] xl:px-[60px] 2xl:px-[155px]"
         >
-          <img src={SITE_URL + "/" + IMAGE_PATH + "/penny-bus.jpg"} className="rounded-xl"/>
+          <div className=" lg:pr-14">
+            <img
+              src={SITE_URL + "/" + IMAGE_PATH + "/penny-bus.jpg"}
+              className="rounded-xl"
+            />
+          </div>
         </div>
       </div>
     </Layout>

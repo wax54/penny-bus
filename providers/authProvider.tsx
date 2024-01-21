@@ -11,6 +11,8 @@ import {
   UserLoginParams,
   userPermissions,
 } from "../types/user";
+import { useLocalStorageState } from "../hooks";
+import { UserData } from "../types";
 
 type Loadable<DataType> =
   | {
@@ -46,19 +48,41 @@ const authContext = createContext<{
 }>({});
 
 export const AuthProvider = ({ children }: { children: JSX.Element }) => {
-  const [userPermissions, setUserPermissions] = useState<
+  const [userPermissions, setUserPermissions] = useLocalStorageState<
     Loadable<userPermissions>
-  >({ loading: false });
+  >("userPermissions", { loading: false });
+  // const [user, setUser] = useLocalStorageState<UserData>();
+  // useEffect(() => {
+  //   if (user) {
+  //     setUserPermissions({
+  //       loading: false,
+  //       data: { loggedIn: true, user },
+  //     });
+  //   } else {
+  //     setUserPermissions({
+  //       loading: false,
+  //       data: { loggedIn: false, user: undefined },
+  //       error: undefined,
+  //     });
+  //   }
+  // }, [user, setUserPermissions]);
+
   useEffect(() => {
     const attemptRefresh = async () => {
       const token = window.localStorage.getItem("auth");
       if (token) {
-        const { user } = await AuthApi.get(token);
-
-        setUserPermissions({
-          loading: false,
-          data: { loggedIn: true, user },
-        });
+        const { success, user } = await AuthApi.get(token);
+        if (success === false) {
+          setUserPermissions({
+            loading: false,
+            data: { loggedIn: false, user: undefined },
+          });
+        } else {
+          setUserPermissions({
+            loading: false,
+            data: { loggedIn: success, user },
+          });
+        }
       }
     };
     attemptRefresh();
@@ -78,6 +102,7 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
         window.localStorage.setItem("auth", data.token);
         // get user data from endpoint
         const { user } = await AuthApi.get(data.token);
+        // setUser(user);
         setUserPermissions({
           loading: false,
           data: { loggedIn: true, user },
@@ -101,7 +126,8 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
         // store token in local storage
         window.localStorage.setItem("auth", data.token);
         // get user data from endpoint
-        const user = await AuthApi.get(data.token);
+        const { user } = await AuthApi.get(data.token);
+        // setUser(user);
         setUserPermissions({
           loading: false,
           data: { loggedIn: true, user },

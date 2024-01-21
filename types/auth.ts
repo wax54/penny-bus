@@ -1,4 +1,8 @@
-import { PARTITIONS, PartitionName } from "../auth-backend/utils/authTable";
+import {
+  OriginName,
+  PARTITIONS,
+  PartitionName,
+} from "../auth-backend/utils/authTable";
 
 export type MinAuthDBData = {
   PK: PartitionName;
@@ -42,8 +46,10 @@ export type TokenData = TokenKeyComponents & {
   createdAt: number;
   valid: boolean;
   admin: boolean;
-  deleteDate: string;
+  deleteDate: number;
 };
+
+export type OriginData = Partial<Record<OriginName, number>>;
 
 export type UserData = UserKeyComponents &
   UserGSI1KeyComponents & {
@@ -56,7 +62,7 @@ export type UserData = UserKeyComponents &
     tz?: string;
     createdAt: number;
     admin: boolean;
-  };
+  } & OriginData;
 
 export type UserDBData = UserKeys & UserData;
 export type TokenDBData = TokenKey & TokenData;
@@ -73,4 +79,5 @@ export type CreateUserInput = {
   name: string;
 } & Partial<UserData>;
 
-export type LoginUserInput = Pick<CreateUserInput, "username" | "password">;
+export type LoginUserInput = Pick<CreateUserInput, "username" | "password"> &
+  OriginData;

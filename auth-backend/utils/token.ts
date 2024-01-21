@@ -1,5 +1,9 @@
 import JWT from "jsonwebtoken";
-import { SECRET_JWT_HASH, TOKEN_HARD_EXPIRE, TOO_OLD_TO_REFRESH_DAYS } from "../config";
+import {
+  SECRET_JWT_HASH,
+  TOKEN_HARD_EXPIRE,
+  TOO_OLD_TO_REFRESH_DAYS,
+} from "../config";
 import { PARTITIONS, authTable } from "./authTable";
 import { randomUUID } from "crypto";
 import { RefreshUserInput } from "../Refresh";
@@ -14,7 +18,7 @@ export const Token = {
 
   create: async ({ id, admin }: { id: string; admin: boolean }) => {
     const tokenHash = randomUUID();
-    const createdAt = new Date().getTime(); 
+    const createdAt = new Date().getTime();
     await authTable.token.create({
       type: PARTITIONS.TOKEN,
       tokenHash,
@@ -22,7 +26,7 @@ export const Token = {
       admin: admin,
       valid: true,
       createdAt,
-      deleteDate: new Date(createdAt + TOKEN_HARD_EXPIRE * 24 * 60 * 60 * 1000).toISOString() // days * 24 hours * 60 mins * 60 seconds * 1000 ms
+      deleteDate: createdAt / 1000 + TOKEN_HARD_EXPIRE * 24 * 60 * 60, // days * 24 hours * 60 mins * 60 seconds = epoch seconds
     });
     const token = Token.encode({ id, tokenHash, admin });
     return token;

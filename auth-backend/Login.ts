@@ -7,6 +7,8 @@ import {
 import { LoginUserInput } from "../types";
 import { User } from "./utils/user";
 import { Token } from "./utils/token";
+import { HandlerError } from "../image-backend/Errors";
+import { getOrigin } from "./utils/common";
 
 const getBody = (event: APIGatewayProxyEvent): LoginUserInput => {
   if (!event.body) throw Error("No body");
@@ -25,9 +27,10 @@ export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
+    const origin = getOrigin(event);
     const loginBody = getBody(event);
 
-    const user = await User.login(loginBody);
+    const user = await User.login(loginBody, origin);
     const token = await Token.create(user);
 
     return {
@@ -39,6 +42,9 @@ export const handler: Handler = async (
     };
   } catch (e: any) {
     console.log(e);
+    if (e instanceof HandlerError) {
+      return e.generateHandlerResponse();
+    }
 
     return {
       statusCode: 401,
@@ -47,10 +53,6 @@ export const handler: Handler = async (
         message: "username or password not found",
       }),
     };
-    // return {
-    //   statusCode: 400,
-    //   body: JSON.stringify({ success: false, e, error: e.message }),
-    // };
   }
 };
 function passCompare(password: string, hash: string) {

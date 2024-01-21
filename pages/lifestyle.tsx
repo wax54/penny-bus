@@ -37,9 +37,9 @@ const LifestyleArticle = ({
   }, [breakPoint]);
   const pinNumber = useRef(Math.floor(Math.random() * 4));
   return article ? (
-    <div className="m-10">
+    <div className="">
       <div
-        className={` m-auto p-5 w-[300px] md:w-[600px] bg-white rounded-xl `}
+        className={` m-auto p-5 w-[300px] md:w-[600px] bg-main rounded-xl text-textPrimary`}
         style={{
           translate: `calc(${offset}vw )`,
         }}
@@ -71,9 +71,8 @@ export default function Lifestyle({
 }: InferGetStaticPropsType<typeof getServerSideProps> & { admin?: boolean }) {
   return (
     <Layout>
-      <h2
+      {/* <h2
         style={{
-          color: "white",
           textAlign: "center",
           padding: 10,
           margin: 10,
@@ -81,16 +80,18 @@ export default function Lifestyle({
         }}
       >
         LIFE STYLE
-      </h2>
+      </h2> */}
       <div
-        className="h-[full] bg-repeat "
+        className="h-[full] bg-repeat dark:invert"
         style={{
           backgroundImage: `url(${SITE_URL}/${IMAGE_PATH}/repeating-lifestyle.jpg)`,
         }}
       >
-        {articles.map((article) => (
-          <LifestyleArticle key={article.title} article={article} />
-        ))}
+        <div className="dark:invert">
+          {articles.map((article) => (
+            <LifestyleArticle key={article.title} article={article} />
+          ))}
+        </div>
       </div>
     </Layout>
   );

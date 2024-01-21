@@ -21,7 +21,7 @@ export const Nav = () => {
             <a
               key={item.href}
               href={item.href}
-              className={`flex-1 text-center duration-300 text-textPrimary m-1 py-2 px-5 rounded-[10px] hover:bg-primary hover:text-textPrimary ${
+              className={`flex-1 text-center duration-150 text-textPrimary m-1 py-2 px-5 rounded-[10px] hover:outline-textPrimary outline-none hover:text-textPrimary ${
                 isCurrentPage(item.href, currentPage) ? "bg-secondary" : ""
               } ${
                 isHidden

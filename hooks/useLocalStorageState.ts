@@ -14,7 +14,6 @@ const useLocalStorageState = <StateType>(
     }
   }
   const [state, setState] = useState(getState());
-
   useEffect(() => {
     if (global?.window?.localStorage) {
       global.window.localStorage[storageName] = JSON.stringify(state);

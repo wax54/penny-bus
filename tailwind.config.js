@@ -2,6 +2,7 @@ import { breakPoints } from "./breakPoints";
 /** @type {import('tailwindcss').Config} */
 
 module.exports = {
+  darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -18,16 +19,23 @@ module.exports = {
       ])
     ),
     extend: {
+      minWidth: {
+        6: "6rem",
+        12: "12rem",
+      },
       colors: {
-        textPrimary: "#000000",
-        textSecondary: "#FFFF00",
-        textAccent: "#FFFFFF",
-        accent: "#EE9999",
-        secondary: "#EEFFEE",
-        primary: "#99EE99",
-        disabled: "#888888",
-        secondaryAccent: "#EEFFEE",
-        white: "#FFFFFF",
+        main: "rgb(var(--color-main) / <alpha-value>)",
+        primary: "rgb(var(--color-primary) / <alpha-value>)",
+        secondary: "rgb(var(--color-secondary) / <alpha-value>)",
+        accent: "rgb(var(--color-accent) / <alpha-value>)",
+        warning: "rgb(var(--color-warning) / <alpha-value>)",
+        disabled: "rgb(var(--color-disabled) / <alpha-value>)",
+        textPrimary: "rgb(var(--color-textPrimary) / <alpha-value>)",
+        textSecondary: "rgb(var(--color-textSecondary) / <alpha-value>)",
+        textAccent: "rgb(var(--color-textAccent) / <alpha-value>)",
+        textwarning: "rgb(var(--color-textWarning) / <alpha-value>)",
+        textDisabled: "rgb(var(--color-textDisabled) / <alpha-value>)",
+        transparent: "transparent",
       },
 
       keyframes: {

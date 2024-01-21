@@ -2,14 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-h1  {
- font-size: x-large;
+h1 {
+  font-size: x-large;
 }
 
-h2  {
+h2 {
   font-size: large;
- }
+}
 
-h3  {
+h3 {
   font-size: medium;
- }
+}
+
+@layer base {
+  :root {
+    --color-main: 255 255 255;
+    --color-primary: 155 246 155;
+    --color-secondary: 246 255 246;
+    --color-accent: 246 155 155;
+    --color-disabled: 125 125 125;
+    --color-warning: 255 0 0;
+    --color-textPrimary: 0 0 0;
+    --color-textSecondary: 0 0 0;
+    --color-textAccent: 255 255 255;
+    --color-textWarning: 255 255 255;
+    --color-textDisabled: 255 255 255;
+  }
+  :root[class~="dark"] {
+    --color-main: 10 10 10;
+    --color-primary: 0 0 255;
+    --color-secondary: 100 100 155;
+    --color-accent: 155 155 100;
+    --color-disabled: 125 125 125;
+    --color-warning: 255 0 0;
+    --color-textPrimary: 255 255 255;
+    --color-textSecondary: 255 255 255;
+    --color-textAccent: 255 255 255;
+    --color-textWarning: 255 255 255;
+    --color-textDisabled: 255 255 255;
+  }
+}

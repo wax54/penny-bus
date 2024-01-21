@@ -14,52 +14,21 @@ import { useAuthTools, usePermissions } from "../../providers/authProvider";
 import { Button } from "../../components/Button";
 type UserFormValues = UserCreateParams & UserLoginParams;
 
-type GetTextReturnType = {
-  title: string;
-  username?: { label: string; placeholder: string };
-  password?: { label: string; placeholder: string };
-  name?: { label: string; placeholder: string };
-  CTA: { text: string };
-  secondaryCTA?: { text: string; href: string };
+type FormType = {
+  username: string;
+  password: string;
+  "confirm-password": string;
+  name: string;
 };
-const getText = ({
-  pageSlug,
-}: {
-  pageSlug: "create" | "login";
-}): GetTextReturnType => {
-  const defaultName = { label: "Name", placeholder: "Alex Decanter" };
-  const defaultText = {
-    title: "Welcome!",
-    username: { label: "Username", placeholder: "SparkySilver" },
-    password: {
-      label: "Password",
-      placeholder: "S upe80!!r Sec!r  et!P!a s981480!s",
-    },
-    CTA: { text: "Submit" },
-  } as GetTextReturnType;
 
-  if (pageSlug === "login") {
-    return {
-      ...defaultText,
-      title: "Login here",
-      secondaryCTA: {
-        text: "New here?",
-        href: authRedirects.getCreateRedirect(),
-      },
-    };
-  } else if (pageSlug === "create") {
-    return {
-      ...defaultText,
-      title: "Signup!",
-      name: defaultName,
-      secondaryCTA: {
-        text: "Been here before?",
-        href: authRedirects.getLoginRedirect(),
-      },
-    };
-  } else {
-    throw Error("NOT SET UP TO HANDLE PAGE :'" + pageSlug + "'");
-  }
+type InputType<Form> = {
+  id: string;
+  name: keyof Form;
+  type?: "password" | "text"; // defaults to text
+  label: string;
+  placeholder: string;
+  autoComplete: string;
+  required?: true;
 };
 
 const Input = ({
@@ -86,6 +55,77 @@ const Input = ({
   );
 };
 
+type GetTextReturnType = {
+  title: string;
+  inputs: InputType<FormType>[];
+  CTA: { text: string };
+  secondaryCTA?: { text: string; href: string };
+};
+const getText = ({
+  pageSlug,
+}: {
+  pageSlug: "create" | "login";
+}): GetTextReturnType => {
+  const name = {
+    id: "name",
+    label: "Name",
+    name: "name",
+    placeholder: "Alex Decanter",
+    autoComplete: "name",
+    required: true,
+  } as const;
+  const username = {
+    id: "username",
+    label: "Username",
+    name: "username",
+    placeholder: "SparkySilver",
+    autoComplete: "username",
+  } as const;
+  const password = {
+    id: "password",
+    label: "Password",
+    name: "password",
+    type: "password",
+    placeholder: "S upe80!!r Sec!r  et!P!a s981480!s",
+    autoComplete: "current-password",
+  } as const;
+  const CTA = { text: "Submit" };
+
+  if (pageSlug === "login") {
+    return {
+      title: "Login here",
+      inputs: [username, password],
+      CTA,
+      secondaryCTA: {
+        text: "New here?",
+        href: authRedirects.getCreateRedirect(),
+      },
+    };
+  } else if (pageSlug === "create") {
+    return {
+      title: "Signup!",
+      inputs: [
+        username,
+        { ...password, autoComplete: "new-password" },
+        {
+          ...password,
+          autoComplete: "new-password",
+          name: "confirm-password",
+          label: "Confirm password",
+        },
+        name,
+      ],
+      CTA,
+      secondaryCTA: {
+        text: "Been here before?",
+        href: authRedirects.getLoginRedirect(),
+      },
+    };
+  } else {
+    throw Error("NOT SET UP TO HANDLE PAGE :'" + pageSlug + "'");
+  }
+};
+
 export const Auth = ({
   pageSlug,
 }: InferGetStaticPropsType<typeof getStaticProps>) => {
@@ -93,13 +133,24 @@ export const Auth = ({
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormType>({
     username: "",
     password: "",
+    "confirm-password": "",
     name: "",
   });
   const pushMessage = usePushMessage();
-
+  const validate = (form: FormType) => {
+    if (pageSlug === "login") {
+      return form.username && form.password;
+    } else if (pageSlug === "create") {
+      return (
+        form["confirm-password"] && form.name && form.password && form.username
+      );
+    } else {
+      throw Error('unknown page slug "' + pageSlug + '"');
+    }
+  };
   const gainAccess = useCallback(
     (user: UserFormValues) => {
       //TODO Validation
@@ -124,14 +175,14 @@ export const Auth = ({
               setLoading(false);
               pushMessage({ message: e.message, type: "error" });
             })
-        : console.log("LOGIN/SIGNUP DOESN'T EXIST LET!");
+        : console.log("LOGIN/SIGNUP DOESN'T EXIST YET!");
     },
     [pageSlug, setLoading, router, login, signup]
   );
   if (!pageSlug) {
     return <div> LOADING...</div>;
   }
-  const { title, password, username, name, CTA, secondaryCTA } = getText({
+  const { title, inputs, CTA, secondaryCTA } = getText({
     pageSlug,
   });
   const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
@@ -146,42 +197,21 @@ export const Auth = ({
       <div>
         <form className="flex flex-col items-center">
           <h1>{title}</h1>
-          {username ? (
-            <Input
-              id="username"
-              name="username"
-              disabled={loading}
-              {...username}
-              value={form.username}
-              onChange={handleChange}
-            />
-          ) : null}
-          {password ? (
-            <Input
-              type="password"
-              name="password"
-              {...password}
-              disabled={loading}
-              value={form.password}
-              onChange={handleChange}
-            />
-          ) : null}
-          {name ? (
-            <Input
-              type="name"
-              name="name"
-              {...name}
-              disabled={loading}
-              value={form.name}
-              onChange={handleChange}
-            />
-          ) : null}
 
+          {inputs.map((inputDetails) => (
+            <Input
+              key={inputDetails.id}
+              {...inputDetails}
+              disabled={loading}
+              value={form[inputDetails.name]}
+              onChange={handleChange}
+            />
+          ))}
           <Button
             type="submit"
             disabled={loading}
             btnType="primary"
-            onClick={() => gainAccess(form)}
+            onClick={() => validate(form) && gainAccess(form)}
           >
             {CTA.text}
           </Button>

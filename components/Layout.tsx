@@ -9,7 +9,7 @@ export const Layout = (props: {
     <div
       id="page"
       className="min-h-screen
-      bg-white
+      bg-main
       "
     >
       <div id="view" className="">
