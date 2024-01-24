@@ -8,7 +8,7 @@ provider:
   versionFunctions: false
   logRetentionInDays: 30
   deploymentBucket:
-    name: serverless-deployment.pennybusproject.com
+    name: serverless-deployment.global.sam-the-dev.com
 custom:
   stage: ${opt:stage, self:provider.stage}
   domains:
@@ -379,7 +379,7 @@ resources:
     Record:
       Type: AWS::Route53::RecordSet
       Properties:
-        HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
+        HostedZoneName: ${ssm:/penny/global/zone-name}.
         Name: ${self:custom.domain}
         Type: A
         # TTL: 300
@@ -392,7 +392,7 @@ resources:
       DependsOn:
         - Record
       Properties:
-        HostedZoneName: ${ssm:/sam-the-dev/global/pennybusproject-zone-name}.
+        HostedZoneName: ${ssm:/penny/global/zone-name}.
         Name: www.${self:custom.domain}
         Type: A
         # TTL: 300

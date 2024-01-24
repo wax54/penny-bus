@@ -11,7 +11,7 @@ provider:
     AUTH_TABLE: ${self:custom.authTableName}
     SECRET_JWT_HASH: ${ssm:/penny/${self:custom.stage}/auth/secretKey}
   deploymentBucket:
-    name: serverless-deployment.pennybusproject.com
+    name: serverless-deployment.global.sam-the-dev.com
 custom:
   stage: ${opt:stage, self:provider.stage}
   environments:

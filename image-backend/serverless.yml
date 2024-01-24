@@ -8,7 +8,7 @@ provider:
   versionFunctions: false
   logRetentionInDays: 30
   deploymentBucket:
-    name: serverless-deployment.pennybusproject.com
+    name: serverless-deployment.global.sam-the-dev.com
   apiGateway:
     binaryMediaTypes:
       - "multipart/form-data"

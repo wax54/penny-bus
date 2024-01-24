@@ -10,7 +10,7 @@ provider:
   environment:
     BUS_TABLE: ${self:custom.busTableName}
   deploymentBucket:
-    name: serverless-deployment.pennybusproject.com
+    name: serverless-deployment.global.sam-the-dev.com
 custom:
   stage: ${opt:stage, self:provider.stage}
   environments:
