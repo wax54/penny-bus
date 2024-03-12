@@ -49,9 +49,17 @@ export default function Blog({
       >
         Our BlogApi!
       </h2>
-      {admin ? <a href={`./blog/${NEW_BLOG_SLUG}`}>New post</a> : null}
 
-      <div className="flex justify-end">
+      <div className="flex justify-between m-5 px-2">
+        {admin ? (
+          <a
+            className="pl-4 rounded bg-primary/50 px-4 py-2 mr-2 text-textPrimary hover:bg-secondary/50 hover:text-textSecondary"
+            href={`./blog/${NEW_BLOG_SLUG}`}
+          >
+            New post
+          </a>
+        ) : null}
+
         <button
           className="rounded bg-primary/50 px-4 py-2 mr-2 text-textPrimary hover:bg-secondary/50 hover:text-textSecondary"
           onClick={progressSort}
@@ -59,7 +67,8 @@ export default function Blog({
           Sort by: {sort.label}
         </button>
       </div>
-      <ol style={{ margin: 20 }}>
+      <ol className="m-5">
+        
         {blogs
           ? blogs
               .sort((a, b) => sort.sortFunc(a, b))

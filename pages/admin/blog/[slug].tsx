@@ -19,6 +19,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { useLocations } from "../../../providers/dataStore";
 import { ImagePreview } from "../../../components/ImagePreview";
+import { Input } from "../../../components/Input";
 
 // export const getStaticPaths = publicSingleBlogPage.getStaticPaths;
 export const getServerSideProps = (
@@ -107,7 +108,8 @@ export const UpdateBlog = ({
           )}
         </div>
 
-        <input
+        <Input
+          label="Slug"
           name="slug"
           disabled={slug !== NEW_BLOG_SLUG || loading}
           className="my-4 p-4 w-full"
@@ -122,7 +124,8 @@ export const UpdateBlog = ({
           }}
         />
 
-        <input
+        <Input
+          label="Title"
           name="title"
           className="my-4 p-4 w-full"
           disabled={loading}
@@ -134,7 +137,8 @@ export const UpdateBlog = ({
           }}
         />
 
-        <input
+        <Input
+          label="Subtitle"
           name="subtitle"
           disabled={loading}
           className="my-4 p-4 w-full"
@@ -148,7 +152,9 @@ export const UpdateBlog = ({
         {locations?.loading ? (
           "..."
         ) : locations?.data ? (
-          <select
+          <Input
+            inputType="select"
+            label="Location"
             name="locationSlug"
             className="my-4 p-4 w-full"
             placeholder="Location"
@@ -168,11 +174,12 @@ export const UpdateBlog = ({
                 {location.name} ({location.city})
               </option>
             ))}
-          </select>
+          </Input>
         ) : (
           "ERROR: " + (locations?.error ?? "unknown")
         )}
-        <input
+        <Input
+          label="fee"
           name="fee"
           className="my-4 p-4 w-full"
           disabled={loading}
@@ -185,7 +192,8 @@ export const UpdateBlog = ({
           }}
         />
         <div>
-          <input
+          <Input
+            label="arrival"
             name="arrival"
             type="datetime-local"
             disabled={loading}
@@ -200,7 +208,8 @@ export const UpdateBlog = ({
               }));
             }}
           />
-          <input
+          <Input
+            label="departure"
             name="departure"
             type="datetime-local"
             disabled={loading}
@@ -282,14 +291,14 @@ export const UpdateBlog = ({
           : null}
         <div>
           <input
+            name="isHidden"
             id="isHidden"
             type="checkbox"
-            name="isHidden"
             className="my-4 p-4 w-full"
             disabled={loading}
             checked={currBlog.isHidden ? true : false}
             onChange={(evt) => {
-              const { checked, name } = evt.target;
+              const { checked, name } = evt.target
               setCurrBlog((blog) => ({ ...blog, [name]: checked }));
             }}
           />

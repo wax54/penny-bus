@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { FromConstObject } from "../types";
+import { Notification } from "../components/Notification";
 
 export const MESSAGE_TYPES = {
   ERROR: "error",
@@ -14,7 +15,7 @@ export const MESSAGE_TYPES = {
 type MessageType = FromConstObject<typeof MESSAGE_TYPES>;
 
 type Message = { message: string; type: MessageType };
-const messagesContext = createContext<{
+export const messagesContext = createContext<{
   markRead: (message: string) => void;
   push: (message: Message) => void;
   currentMessage?: Message;
@@ -54,25 +55,4 @@ export const MessageProvider = ({ children }: ReactElement["props"]) => {
       <>{children}</>
     </messagesContext.Provider>
   );
-};
-
-const Notification = () => {
-  const { currentMessage, markRead } = useContext(messagesContext);
-  const bgClass =
-    currentMessage?.type === "info"
-      ? "bg-primary text-textPrimary"
-      : currentMessage?.type === "error"
-      ? "bg-warning text-textWarning"
-      : "";
-  return currentMessage ? (
-    <div className={`absolute top-4 right-4 p-4 ${bgClass}`}>
-      <button
-        className="absolute top-2 right-2"
-        onClick={() => markRead(currentMessage.message)}
-      >
-        X
-      </button>
-      <div className="p-4 m-2">{currentMessage.message}</div>
-    </div>
-  ) : null;
 };

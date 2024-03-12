@@ -12,6 +12,7 @@ import { authRedirects } from "../../utils/auth";
 import { usePushMessage } from "../../providers";
 import { useAuthTools, usePermissions } from "../../providers/authProvider";
 import { Button } from "../../components/Button";
+import { Input } from "../../components/Input";
 type UserFormValues = UserCreateParams & UserLoginParams;
 
 type FormType = {
@@ -31,29 +32,6 @@ type InputType<Form> = {
   required?: true;
 };
 
-const Input = ({
-  label,
-  error,
-  ...props
-}: JSX.IntrinsicElements["input"] & {
-  label: string;
-  error?: string;
-}) => {
-  const id = props.id ?? props.name;
-  return (
-    <div className="my-3 flex flex-col items-start ">
-      <label className="mb-1 text-textPrimary" htmlFor={id}>
-        {label}
-      </label>
-      <input
-        className=" p-4 rounded w-[250px] md:w-[500px]"
-        {...props}
-        id={id}
-      />
-      <div> {error}</div>
-    </div>
-  );
-};
 
 type GetTextReturnType = {
   title: string;

@@ -55,14 +55,14 @@ export default function Location({
       <div className="flex justify-between">
         {admin ? (
           <a
-            className="rounded bg-primary/50 px-4 py-2 ml-2 hover:bg-secondary/50 hover:text-textSecondary"
+          className="rounded bg-primary/50 px-4 py-2 mr-2 text-textPrimary hover:bg-secondary/50 hover:text-textSecondary"
             href={`./location/${NEW_LOCATION_SLUG}`}
           >
             New post
           </a>
         ) : null}
         <button
-          className="rounded bg-primary/50 px-4 py-2 mr-2 hover:bg-secondary/50 hover:text-textSecondary"
+          className="rounded bg-primary/50 px-4 py-2 mr-2 text-textPrimary hover:bg-secondary/50 hover:text-textSecondary"
           onClick={progressSort}
         >
           Sort by: {sort.label}

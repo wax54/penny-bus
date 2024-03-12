@@ -24,6 +24,7 @@ module.exports = {
         12: "12rem",
       },
       colors: {
+        red:'red',
         main: "rgb(var(--color-main) / <alpha-value>)",
         primary: "rgb(var(--color-primary) / <alpha-value>)",
         secondary: "rgb(var(--color-secondary) / <alpha-value>)",
@@ -33,7 +34,7 @@ module.exports = {
         textPrimary: "rgb(var(--color-textPrimary) / <alpha-value>)",
         textSecondary: "rgb(var(--color-textSecondary) / <alpha-value>)",
         textAccent: "rgb(var(--color-textAccent) / <alpha-value>)",
-        textwarning: "rgb(var(--color-textWarning) / <alpha-value>)",
+        textWarning: "rgb(var(--color-textWarning) / <alpha-value>)",
         textDisabled: "rgb(var(--color-textDisabled) / <alpha-value>)",
         transparent: "transparent",
       },
