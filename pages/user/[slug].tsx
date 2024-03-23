@@ -163,7 +163,7 @@ export const Auth = ({
   const { title, inputs, CTA, secondaryCTA } = getText({
     pageSlug,
   });
-  const handleChange = (evt: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (evt: ChangeEvent<HTMLInputElement & HTMLSelectElement>) => {
     const { value, name } = evt.target;
     setForm((form) => ({
       ...form,

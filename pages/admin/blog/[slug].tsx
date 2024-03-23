@@ -1,20 +1,8 @@
-import {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import * as publicSingleBlogPage from "../../blog/[slug]";
-import {
-  ChangeEvent,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, useCallback, useRef, useState } from "react";
 import { Api } from "../../../api";
-import {
-  BlogData,
-  BlogKeyComponents,
-  PARTITIONS,
-} from "../../../types";
+import { BlogData, BlogKeyComponents, PARTITIONS } from "../../../types";
 import { NEW_BLOG_SLUG } from "../../../constants/config";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -94,9 +82,10 @@ export const UpdateBlog = ({
     evt: ChangeEvent<HTMLInputElement & HTMLSelectElement>
   ) => {
     const { value, name } = evt.target;
+    const parsedValue = name === "slug" ? value.replace(/\s/, "").toLowerCase() : value;
     setCurrBlog((blog) => ({
       ...blog,
-      [name]: value.replace(/\s/, ""),
+      [name]: parsedValue,
     }));
   };
 

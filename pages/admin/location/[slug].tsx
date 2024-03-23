@@ -1,12 +1,7 @@
-import {
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-  InferGetStaticPropsType,
-} from "next";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import * as publicSingleLocationPage from "../../location/[slug]";
 // import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Api, ImageApi } from "../../../api";
 import {
   LocationData,
@@ -19,8 +14,8 @@ import Link from "next/link";
 import { states } from "../../../constants/states";
 import { countries } from "../../../constants/countries";
 import { Image } from "../../../types/image";
-import { ImageCreate200Response } from "../../../image-backend/types";
 import { ImagePreview } from "../../../components/ImagePreview";
+import { Input } from "../../../components/Input";
 
 const isSameFile = (
   file: Pick<Image, "name" | "size">,
@@ -158,6 +153,34 @@ export const UpdateLocation = ({
       })
       .catch((e) => setLoading(false));
   }, [slug, setLoading, router, currLocation.slug, currLocation.type]);
+
+  const handleChange = (
+    evt: ChangeEvent<HTMLInputElement & HTMLSelectElement>
+  ) => {
+    const { value, name } = evt.target;
+    const parsedValue =
+      name === "slug"
+        ? value.replace(/\s/, "").toLowerCase()
+        : name === "pin"
+        ? {
+            lat:
+              value
+                .replace(/\s/g, "")
+                .split(",")[0]
+                .replace(/[^0-9-\.]/, "") ?? "",
+            lng:
+              value
+                .replace(/\s/g, "")
+                .split(",")[1]
+                .replace(/[^0-9-\.]/, "") ?? "",
+          }
+        : value;
+    setCurrLocation((location) => ({
+      ...location,
+      [name]: parsedValue,
+    }));
+  };
+
   return (
     <div className="bg-white flex flex-column sm:flex-row">
       <Link href="/admin/location">Location list</Link>
@@ -181,167 +204,129 @@ export const UpdateLocation = ({
           )}
         </div>
 
-        <input
+        <Input
           name="slug"
+          label="Slug"
           disabled={slug !== NEW_BLOG_SLUG || loading}
           className="my-4 p-4 w-full"
           placeholder="Slug"
           value={currLocation.slug}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({
-              ...location,
-              [name]: value.replace(/\s/, "-").toLowerCase(),
-            }));
-          }}
+          onChange={handleChange}
         />
 
-        <input
+        <Input
           name="name"
+          label="Name"
           className="my-4 p-4 w-full"
           disabled={loading}
           placeholder="Name"
           value={currLocation.name}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({ ...location, [name]: value }));
-          }}
+          onChange={handleChange}
         />
 
-        <select
+        <Input
           name="locationType"
+          label="Location Type"
+          inputType="select"
           className="my-4 p-4 w-full"
           placeholder="Location"
           disabled={loading}
           value={currLocation.locationType}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({
-              ...location,
-              [name]: value,
-            }));
-          }}
+          onChange={handleChange}
         >
           <option value="">Select</option>
           <option value="dispersed">Dispersed</option>
           <option value="campsite">Campsite</option>
           <option value="relation">Relation</option>
-        </select>
+        </Input>
 
-        <input
+        <Input
           name="fee"
+          label="Fee"
           className="my-4 p-4 w-full"
           disabled={loading}
           placeholder="Fee"
           value={currLocation.fee}
           type="number"
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({ ...location, [name]: value }));
-          }}
+          onChange={handleChange}
         />
-        <select
+        <Input
           name="rate"
+          label="Rate"
+          inputType="select"
           className="my-4 p-4 w-full"
           placeholder="Rate"
           disabled={loading}
           value={currLocation.rate}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({
-              ...location,
-              [name]: value,
-            }));
-          }}
+          onChange={handleChange}
         >
           <option value="nightly">Nightly</option>
-        </select>
+        </Input>
 
-        <input
+        <Input
           name="pin"
+          label="Pin"
           disabled={loading}
           className="my-4 p-4 w-full"
           placeholder="Pin"
           value={`${
             currLocation.pin?.lat !== undefined ? currLocation.pin.lat : ""
           },${currLocation.pin?.lng !== undefined ? currLocation.pin.lng : ""}`}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            const [lat = "", lng = ""] = value.replace(/\s/g, "").split(",");
-            setCurrLocation((location) => ({
-              ...location,
-              [name]: {
-                lat: lat.replace(/[^0-9-\.]/, ""),
-                lng: lng.replace(/[^0-9-\.]/, ""),
-              },
-            }));
-          }}
+          onChange={handleChange}
         />
 
-        <input
+        <Input
           name="city"
+          label="City"
           className="my-4 p-4 w-full"
           disabled={loading}
           placeholder="City"
           value={currLocation.city}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({ ...location, [name]: value }));
-          }}
+          onChange={handleChange}
         />
-        <select
+        <Input
           name="state"
+          label="State"
+          type="select"
           className="my-4 p-4 w-full"
           placeholder="State"
           disabled={loading}
           value={currLocation.state}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({
-              ...location,
-              [name]: value,
-            }));
-          }}
+          onChange={handleChange}
         >
           {states.map((state) => (
             <option key={state.code} value={state.code}>
               {state.name}
             </option>
           ))}
-        </select>
+        </Input>
 
-        <input
+        <Input
           name="zip"
+          label="Zip"
           className="my-4 p-4 w-full"
           disabled={loading}
           placeholder="Zip"
           value={currLocation.zip}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({ ...location, [name]: value }));
-          }}
+          onChange={handleChange}
         />
 
-        <select
+        <Input
           name="countryCode"
+          label="Country Code"
+          inputType="select"
           className="my-4 p-4 w-full"
           placeholder="Country"
           disabled={loading}
           value={currLocation.countryCode}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrLocation((location) => ({
-              ...location,
-              [name]: value,
-            }));
-          }}
+          onChange={handleChange}
         >
           {countries.map((country) => (
             <option key={country.code} value={country.code}>
               {country.name}
             </option>
           ))}
-        </select>
+        </Input>
         <div>
           <label htmlFor="img">Select image:</label>
           <input
@@ -404,8 +389,9 @@ export const UpdateLocation = ({
             {currLocation.images?.map((image) => (
               <div key={image.name}>
                 {image.name}
-                <input
+                <Input
                   name={"ref" + image.name}
+                  label="Image Ref"
                   className="my-4 p-4 w-full text-primary"
                   disabled={loading}
                   placeholder="Image ref"
