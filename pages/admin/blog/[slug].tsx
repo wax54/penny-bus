@@ -1,17 +1,18 @@
 import {
-  GetServerSideProps,
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
-  InferGetStaticPropsType,
 } from "next";
 import * as publicSingleBlogPage from "../../blog/[slug]";
-// import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import { Api } from "../../../api";
 import {
   BlogData,
   BlogKeyComponents,
-  LocationData,
   PARTITIONS,
 } from "../../../types";
 import { NEW_BLOG_SLUG } from "../../../constants/config";
@@ -89,6 +90,16 @@ export const UpdateBlog = ({
       .catch((e) => setLoading(false));
   }, [slug, setLoading, router, currBlog.slug, currBlog.type]);
 
+  const handleChange = (
+    evt: ChangeEvent<HTMLInputElement & HTMLSelectElement>
+  ) => {
+    const { value, name } = evt.target;
+    setCurrBlog((blog) => ({
+      ...blog,
+      [name]: value.replace(/\s/, ""),
+    }));
+  };
+
   return (
     <div className="bg-white flex flex-column sm:flex-row">
       <Link href="/admin/blog">Blog list</Link>
@@ -115,13 +126,7 @@ export const UpdateBlog = ({
           className="my-4 p-4 w-full"
           placeholder="Slug"
           value={currBlog.slug}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrBlog((blog) => ({
-              ...blog,
-              [name]: value.replace(/\s/, ""),
-            }));
-          }}
+          onChange={handleChange}
         />
 
         <Input
@@ -131,10 +136,7 @@ export const UpdateBlog = ({
           disabled={loading}
           placeholder="Title"
           value={currBlog.title}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrBlog((blog) => ({ ...blog, [name]: value }));
-          }}
+          onChange={handleChange}
         />
 
         <Input
@@ -144,10 +146,7 @@ export const UpdateBlog = ({
           className="my-4 p-4 w-full"
           placeholder="Subtitle"
           value={currBlog.subtitle}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrBlog((blog) => ({ ...blog, [name]: value }));
-          }}
+          onChange={handleChange}
         />
         {locations?.loading ? (
           "..."
@@ -160,13 +159,7 @@ export const UpdateBlog = ({
             placeholder="Location"
             disabled={loading}
             value={currBlog.locationSlug}
-            onChange={(evt) => {
-              const { value, name } = evt.target;
-              setCurrBlog((blog) => ({
-                ...blog,
-                [name]: value,
-              }));
-            }}
+            onChange={handleChange}
           >
             <option value="">Select</option>
             {locations.data.map((location) => (
@@ -186,10 +179,7 @@ export const UpdateBlog = ({
           placeholder="Fee"
           value={currBlog.fee}
           type="number"
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrBlog((blog) => ({ ...blog, [name]: value }));
-          }}
+          onChange={handleChange}
         />
         <div>
           <Input
@@ -200,13 +190,7 @@ export const UpdateBlog = ({
             placeholder="Arrival"
             className="my-4 p-4 w-full"
             value={currBlog.arrival}
-            onChange={(evt) => {
-              const { value, name } = evt.target;
-              setCurrBlog((blog) => ({
-                ...blog,
-                [name]: value,
-              }));
-            }}
+            onChange={handleChange}
           />
           <Input
             label="departure"
@@ -216,13 +200,7 @@ export const UpdateBlog = ({
             placeholder="Departure"
             className="my-4 p-4 w-full"
             value={currBlog.departure}
-            onChange={(evt) => {
-              const { value, name } = evt.target;
-              setCurrBlog((blog) => ({
-                ...blog,
-                [name]: value,
-              }));
-            }}
+            onChange={handleChange}
           />
         </div>
         <textarea
@@ -263,24 +241,20 @@ export const UpdateBlog = ({
           }}
         />
 
-        <select
+        <Input
           name="author"
           className="my-4 p-4 w-full"
           placeholder="Author"
           disabled={loading}
           value={currBlog.author}
-          onChange={(evt) => {
-            const { value, name } = evt.target;
-            setCurrBlog((blog) => ({
-              ...blog,
-              [name]: value,
-            }));
-          }}
+          onChange={handleChange}
+          inputType="select"
+          label="Author"
         >
           <option value="">Select</option>
           <option value="Zoë Williams">Z-Word</option>
           <option value="Sam Crewe-Sullam">SAMMA</option>
-        </select>
+        </Input>
 
         {currBlog?.locationSlug && locations?.data
           ? locations.data
@@ -298,7 +272,7 @@ export const UpdateBlog = ({
             disabled={loading}
             checked={currBlog.isHidden ? true : false}
             onChange={(evt) => {
-              const { checked, name } = evt.target
+              const { checked, name } = evt.target;
               setCurrBlog((blog) => ({ ...blog, [name]: checked }));
             }}
           />
