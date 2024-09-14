@@ -293,6 +293,7 @@ export const UpdateLocation = ({
           disabled={loading}
           value={currLocation.state}
           onChange={handleChange}
+          inputType="select"
         >
           {states.map((state) => (
             <option key={state.code} value={state.code}>
